@@ -1,0 +1,160 @@
+{
+  "functions":
+  [
+    {
+      "type":"container"
+      , "id2":10
+      , "name":"vector_add"
+      , "file":""
+      , "line":"0"
+      , "order":0
+      , "children":[
+        {
+          "type":"container"
+          , "id2":11
+          , "name":""
+          , "file":""
+          , "line":"0"
+          , "order":0
+          , "children":[
+            {
+              "type":"bb"
+              , "id2":12
+              , "name":"Basic Block 0"
+              , "file":""
+              , "line":"0"
+              , "order":0
+            }
+            ,
+            {
+              "type":"bb"
+              , "id2":13
+              , "name":"Basic Block 1"
+              , "file":""
+              , "line":"0"
+              , "order":1
+              , "children":[
+                {
+                  "type":"inst"
+                  , "id2":14
+                  , "name":"Load"
+                  , "file":"1"
+                  , "line":"31"
+                  , "order":1
+                  , "details":
+                  {
+                    "Width":"32 bits"
+                    , "Type":"Streaming"
+                    , "Stall-free":"No"
+                  }
+                }
+                ,
+                {
+                  "type":"inst"
+                  , "id2":15
+                  , "name":"Load"
+                  , "file":"1"
+                  , "line":"31"
+                  , "order":1
+                  , "details":
+                  {
+                    "Width":"32 bits"
+                    , "Type":"Streaming"
+                    , "Stall-free":"No"
+                  }
+                }
+                ,
+                {
+                  "type":"inst"
+                  , "id2":16
+                  , "name":"Store"
+                  , "file":"1"
+                  , "line":"31"
+                  , "order":3
+                  , "details":
+                  {
+                    "Width":"32 bits"
+                    , "Type":"Streaming"
+                    , "Stall-free":"No"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        ,
+        {
+          "type":"container"
+          , "id2":17
+          , "name":""
+          , "file":""
+          , "line":"0"
+          , "order":0
+          , "children":[
+            {
+              "type":"memtype"
+              , "id2":18
+              , "name":"Global Memory"
+              , "file":""
+              , "line":"0"
+              , "order":0
+              , "children":[
+                {
+                  "type":"memsys"
+                  , "id2":19
+                  , "name":""
+                  , "file":""
+                  , "line":"0"
+                  , "order":0
+                  , "children":[
+                    {
+                      "type":"bank"
+                      , "id2":20
+                      , "name":"Bank 0"
+                      , "file":""
+                      , "line":"0"
+                      , "order":0
+                      , "children":[
+                        {
+                          "type":"port"
+                          , "id2":21
+                          , "name":"Port 0"
+                          , "file":""
+                          , "line":"0"
+                          , "order":0
+                          , "edges":[
+                            {
+                              "from":21
+                              , "to":14
+                              , "type":"PORT"
+                            }
+                            ,
+                            {
+                              "from":21
+                              , "to":15
+                              , "type":"PORT"
+                            }
+                            ,
+                            {
+                              "from":21
+                              , "to":16
+                              , "type":"PORT"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+  , "fileIndexMap":
+  {
+    "/home/ish/tmp/cl/vector_add/device/vector_add.cl":"1"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "kernels":
+  [
+    {
+      "name":"vector_add"
+      , "bbtables":
+      [
+        {
+          "header":
+          [
+            {
+              "data":
+              [
+                {
+                  "value":"vector_add.wii_blk"
+                  , "colspan":2
+                }
+                , {
+                  "value":"Resources"
+                  , "colspan":4
+                }
+              ]
+            }
+            , {
+              "data":
+              [
+                {
+                  "value":"Operations"
+                  , "colspan":2
+                }
+                , "LEs"
+                , "FFs"
+                , "RAMs"
+                , "DSPs"
+              ]
+            }
+          ]
+          , "body":
+          [
+            {
+              "data":
+              [
+                {
+                  "value":"Unknown Line"
+                  , "file":0
+                  , "line":0
+                  , "colspan":2
+                }
+                , "0"
+                , "0"
+                , "0"
+                , "0"
+              ]
+            }
+          ]
+        }
+        , {
+          "header":
+          [
+            {
+              "data":
+              [
+                {
+                  "value":"entry"
+                  , "colspan":2
+                }
+                , {
+                  "value":"Resources"
+                  , "colspan":4
+                }
+              ]
+            }
+            , {
+              "data":
+              [
+                {
+                  "value":"Operations"
+                  , "colspan":2
+                }
+                , "LEs"
+                , "FFs"
+                , "RAMs"
+                , "DSPs"
+              ]
+            }
+          ]
+          , "body":
+          [
+            {
+              "data":
+              [
+                {
+                  "value":"vector_add.cl:31"
+                  , "file":1
+                  , "line":31
+                  , "colspan":2
+                }
+                , "2014"
+                , "2623"
+                , "40"
+                , "0"
+              ]
+            }
+            , {
+              "data":
+              [
+                {
+                  "value":"vector_add.cl:32"
+                  , "file":1
+                  , "line":32
+                  , "colspan":2
+                }
+                , "1"
+                , "1"
+                , "0"
+                , "0"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

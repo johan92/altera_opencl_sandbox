@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+ <debug showDebugMenu="0" />
+ <systemtable filter="All Interfaces">
+  <columns>
+   <connections preferredWidth="319" />
+   <irq preferredWidth="63" />
+   <tags preferredWidth="70" />
+   <inputclock preferredWidth="182" />
+   <name preferredWidth="206" />
+   <export preferredWidth="231" />
+   <description preferredWidth="261" />
+   <baseaddress preferredWidth="140" />
+  </columns>
+ </systemtable>
+ <library expandedCategories="Library,Project" />
+ <window width="1921" height="1087" x="0" y="0" />
+</preferences>
