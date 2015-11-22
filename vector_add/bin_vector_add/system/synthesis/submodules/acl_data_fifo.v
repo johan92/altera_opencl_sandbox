@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -50,7 +50,10 @@ module acl_data_fifo
     parameter integer ALLOW_FULL_WRITE = 0,     // 0|1 (only supported by pure reg fifos: ll_reg, zl_reg, ll_counter, zl_counter)
 
     parameter string IMPL = "ram",              // see above (ram|ll_reg|ll_ram|zl_reg|zl_ram|ll_counter|zl_counter)
-    parameter integer ALMOST_FULL_VALUE = 0     // >= 0
+    parameter integer ALMOST_FULL_VALUE = 0,    // >= 0
+    parameter LPM_HINT = "unused",
+    parameter integer BACK_LL_REG_DEPTH = 2,  // the depth of the back ll_reg in sandwich impl, the default is 2
+    parameter string ACL_FIFO_IMPL = "basic"    // impl: (basic|pow_of_2_full|pow_of_2_full_reg_data_in|pow_of_2_full_reg_output_accepted|pow_of_2_full_reg_data_in_reg_output_accepted)
 )
 (
     input logic clock,
@@ -77,7 +80,9 @@ module acl_data_fifo
                 acl_fifo #(
                     .DATA_WIDTH(DATA_WIDTH),
                     .DEPTH(DEPTH),
-                    .ALMOST_FULL_VALUE(ALMOST_FULL_VALUE)
+                    .ALMOST_FULL_VALUE(ALMOST_FULL_VALUE),
+                    .LPM_HINT(LPM_HINT),
+                    .IMPL(ACL_FIFO_IMPL)
                 )
                 fifo (
                     .clock(clock),
@@ -100,12 +105,35 @@ module acl_data_fifo
                 wire [DATA_WIDTH-1:0] r_data;
                 wire staging_reg_stall;
 
+                localparam ALMOST_FULL_DEPTH_LOG2 = $clog2(DEPTH); // required to be DEPTH, this guarantees that almost_full=1 iff fifo occupancy >= ALMOST_FULL_VALUE
+                localparam ALMOST_FULL_DEPTH_SNAPPED_TO_POW_OF_2 = 1 << ALMOST_FULL_DEPTH_LOG2;
+                localparam ALMOST_FULL_COUNTER_OFFSET = ALMOST_FULL_DEPTH_SNAPPED_TO_POW_OF_2 - ALMOST_FULL_VALUE;
+
+                reg [ALMOST_FULL_DEPTH_LOG2:0]  almost_full_counter;
+                wire    input_accepted_for_counter;
+                wire    output_accepted_for_counter;
+
+                assign  input_accepted_for_counter  = valid_in & ~stall_out;
+                assign  output_accepted_for_counter = ~stall_in & valid_out;
+                assign  almost_full                 = almost_full_counter[ALMOST_FULL_DEPTH_LOG2];
+
+                always @(posedge clock or negedge resetn)
+                begin
+                  if (~resetn)
+                  begin
+                    almost_full_counter <= ALMOST_FULL_COUNTER_OFFSET;
+                  end
+                  else
+                  begin
+                    almost_full_counter <= almost_full_counter  + input_accepted_for_counter - output_accepted_for_counter; 
+                  end
+                end 
+                
                 acl_data_fifo #(
                     .DATA_WIDTH(DATA_WIDTH),
                     .DEPTH(DEPTH-1),
                     .ALLOW_FULL_WRITE(1),
-                    .IMPL(IMPL),
-                    .ALMOST_FULL_VALUE(ALMOST_FULL_VALUE)
+                    .IMPL(IMPL)
                 )
                 fifo (
                     .clock(clock),
@@ -116,8 +144,7 @@ module acl_data_fifo
                     .valid_out(r_valid),
                     .empty(empty),
                     .stall_in(staging_reg_stall),
-                    .stall_out(stall_out),
-                    .almost_full(almost_full)
+                    .stall_out(stall_out)
                 );
                 acl_staging_reg #(
                    .WIDTH(DATA_WIDTH)
@@ -139,132 +166,63 @@ module acl_data_fifo
                 // assignments.
 
                 reg [DEPTH-1:0] r_valid_NO_SHIFT_REG;
-                logic [DEPTH-1:0] r_valid_in;
-                reg [DEPTH-1:0][DATA_WIDTH-1:0] r_data_NO_SHIFT_REG;
-                logic [DEPTH-1:0][DATA_WIDTH-1:0] r_data_in;
-                wire [DEPTH-1:0] r_o_stall;
-                logic [DEPTH-1:0] r_i_stall;
-                reg [DEPTH:0] filled_NO_SHIFT_REG;
+                reg [DATA_WIDTH-1:0] r_data_NO_SHIFT_REG;
 
-                integer i;
+                assign empty = 1'b0;
 
-                assign r_o_stall = r_valid_NO_SHIFT_REG & r_i_stall; 
-                assign empty = !r_valid_NO_SHIFT_REG[0];
-
-                always @(*)
-                begin
-                    r_i_stall[0] = stall_in;
-                    r_data_in[DEPTH-1] = data_in;
-                    r_valid_in[DEPTH-1] = valid_in;
-
-                    for (i=1; i<=DEPTH-1; i++)
-                        r_i_stall[i] = r_o_stall[i-1];
-
-                    for (i=0; i<DEPTH-1; i++) 
-                    begin
-                        r_data_in[i] = r_data_NO_SHIFT_REG[i+1];
-                        r_valid_in[i] = r_valid_NO_SHIFT_REG[i+1];
-                    end
-                end
-
-                always @(posedge clock or negedge resetn)
-                begin
-                    if (!resetn)
-                    begin
-                        r_valid_NO_SHIFT_REG <= {(DEPTH){1'b0}};
-                        r_data_NO_SHIFT_REG  <= 'x;
-                        filled_NO_SHIFT_REG  <= {{(DEPTH){1'b0}},1'b1};
-                    end
-                    else
-                    begin
-                        if (valid_in & ~stall_out & ~(valid_out & ~stall_in))
-                        begin
-                            filled_NO_SHIFT_REG <= {filled_NO_SHIFT_REG[DEPTH-1:0],1'b0}; // Added an element
-                        end
-                        else if (~(valid_in & ~stall_out) & valid_out & ~stall_in)
-                        begin
-                            filled_NO_SHIFT_REG <= {1'b0,filled_NO_SHIFT_REG[DEPTH:1]};   // Subtracted an element
-                        end
-
-                        for (i=0; i<=DEPTH-1; i++)
-                        begin
-                            if (!r_o_stall[i])
-                            begin
-                                r_valid_NO_SHIFT_REG[i] <= r_valid_in[i];
-                                r_data_NO_SHIFT_REG[i] <= r_data_in[i];
-                            end
+                always @(posedge clock or negedge resetn) begin
+                    if (!resetn) begin
+                        r_valid_NO_SHIFT_REG <= 1'b0;
+                    end else begin 
+                        if (!stall_in) begin
+                            r_valid_NO_SHIFT_REG <= valid_in;
                         end
                     end
                 end    
-                assign stall_out = filled_NO_SHIFT_REG[DEPTH] & stall_in; 
-                assign valid_out = r_valid_NO_SHIFT_REG[0];
-                assign data_out = r_data_NO_SHIFT_REG[0];
+
+                always @(posedge clock) begin
+                        if (!stall_in) begin
+                            r_data_NO_SHIFT_REG <= data_in;
+                        end
+                end
+
+                assign stall_out = stall_in; 
+                assign valid_out = r_valid_NO_SHIFT_REG;
+                assign data_out = r_data_NO_SHIFT_REG;
             end
             else if( IMPL == "shift_reg" )
             begin
                 // Shift register implementation of a FIFO
 
                 reg [DEPTH-1:0] r_valid;
-                logic [DEPTH-1:0] r_valid_in;
-                reg [DEPTH-1:0][DATA_WIDTH-1:0] r_data;
-                logic [DEPTH-1:0][DATA_WIDTH-1:0] r_data_in;
-                wire [DEPTH-1:0] r_o_stall;
-                logic [DEPTH-1:0] r_i_stall;
-                reg [DEPTH:0] filled;
+                reg [DATA_WIDTH-1:0] r_data[0:DEPTH-1];
 
-                integer i;
+                assign empty = 1'b0;
 
-                assign r_o_stall = r_valid & r_i_stall; 
-                assign empty = !r_valid[0];
-
-                always @(*)
-                begin
-                    r_i_stall[0] = stall_in;
-                    r_data_in[DEPTH-1] = data_in;
-                    r_valid_in[DEPTH-1] = valid_in;
-
-                    for (i=1; i<=DEPTH-1; i++)
-                        r_i_stall[i] = r_o_stall[i-1];
-
-                    for (i=0; i<DEPTH-1; i++) 
-                    begin
-                        r_data_in[i] = r_data[i+1];
-                        r_valid_in[i] = r_valid[i+1];
-                    end
-                end
-
-                always @(posedge clock or negedge resetn)
-                begin
-                    if (!resetn)
-                    begin
+                always @(posedge clock or negedge resetn) begin
+                    if (!resetn) begin
                         r_valid <= {(DEPTH){1'b0}};
-                        r_data  <= 'x;
-                        filled  <= {{(DEPTH){1'b0}},1'b1};
-                    end
-                    else
-                    begin
-                        if (valid_in & ~stall_out & ~(valid_out & ~stall_in))
-                        begin
-                            filled <= {filled[DEPTH-1:0],1'b0}; // Added an element
-                        end
-                        else if (~(valid_in & ~stall_out) & valid_out & ~stall_in)
-                        begin
-                            filled <= {1'b0,filled[DEPTH:1]};   // Subtracted an element
-                        end
-
-                        for (i=0; i<=DEPTH-1; i++)
-                        begin
-                            if (!r_o_stall[i])
-                            begin
-                                r_valid[i] <= r_valid_in[i];
-                                r_data[i] <= r_data_in[i];
+                    end else begin
+                        if (!stall_in) begin
+                            r_valid[0] <= valid_in;
+                            for (int i = 1; i < DEPTH; i++) begin
+                                    r_valid[i] <= r_valid[i - 1];
                             end
                         end
                     end
                 end    
-                assign stall_out = filled[DEPTH] & stall_in; 
-                assign valid_out = r_valid[0];
-                assign data_out = r_data[0];
+
+                always @(posedge clock) begin
+                     if (!stall_in) begin
+                         r_data[0]  <= data_in;
+                         for (int i = 1; i < DEPTH; i++) begin
+                                 r_data[i]  <= r_data[i - 1];
+                         end
+                     end
+                end
+                assign stall_out = stall_in; 
+                assign valid_out = r_valid[DEPTH-1];
+                assign data_out = r_data[DEPTH-1];
             end
             else if( IMPL == "ll_reg" )
             begin
@@ -329,7 +287,10 @@ module acl_data_fifo
 
                 acl_fifo #(
                     .DATA_WIDTH(DATA_WIDTH),
-                    .DEPTH(DEPTH)
+                    .DEPTH(DEPTH),
+                    .ALMOST_FULL_VALUE(ALMOST_FULL_VALUE),
+                    .LPM_HINT(LPM_HINT),
+                    .IMPL(ACL_FIFO_IMPL)
                 )
                 fifo_inner (
                     .clock(clock),
@@ -340,7 +301,8 @@ module acl_data_fifo
                     .valid_out(v2),
                     .stall_in(s2),
                     .empty(empty),
-                    .stall_out(stall_out)
+                    .stall_out(stall_out),
+                    .almost_full(almost_full)
                 );
                 acl_data_fifo #(
                     .DATA_WIDTH(DATA_WIDTH),
@@ -382,7 +344,9 @@ module acl_data_fifo
                 acl_fifo #(
                     .DATA_WIDTH(DATA_WIDTH),
                     .DEPTH(DEPTH),
-                    .ALMOST_FULL_VALUE(ALMOST_FULL_VALUE)
+                    .ALMOST_FULL_VALUE(ALMOST_FULL_VALUE),
+                    .LPM_HINT(LPM_HINT),
+                    .IMPL(ACL_FIFO_IMPL)
                 )
                 fifo_inner (
                     .clock(clock),
@@ -398,7 +362,7 @@ module acl_data_fifo
                 );
                 acl_data_fifo #(
                     .DATA_WIDTH(DATA_WIDTH),
-                    .DEPTH(2),
+                    .DEPTH(BACK_LL_REG_DEPTH),
                     .IMPL("ll_reg")
                 )
                 fifo_outer2 (

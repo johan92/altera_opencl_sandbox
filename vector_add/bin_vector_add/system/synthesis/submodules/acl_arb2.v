@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -307,20 +307,28 @@ module acl_arb_pipeline_reg #(
     pipe_r();
 
     // Pipeline register.
-    always @( posedge clock or negedge resetn )
-        if( !resetn )
-        begin
+    always @( posedge clock or negedge resetn ) begin
+        if( !resetn ) begin
             pipe_r.req <= 'x;   // only signals reset explicitly below need to be reset at all
 
             pipe_r.req.request <= 1'b0;
             pipe_r.req.read <= 1'b0;
             pipe_r.req.write <= 1'b0;
-        end
-        else if( !(out_intf.stall & pipe_r.req.request) )
+        end else if( !(out_intf.stall & pipe_r.req.request) & in_intf.req.enable) begin
             pipe_r.req <= in_intf.req;
+        end
+    end
 
     // Request for downstream blocks.
-    assign out_intf.req = pipe_r.req;
+    assign out_intf.req.enable     = in_intf.req.enable    ; //the enable must bypass the register
+    assign out_intf.req.request    = pipe_r.req.request    ;
+    assign out_intf.req.read       = pipe_r.req.read       ;
+    assign out_intf.req.write      = pipe_r.req.write      ;
+    assign out_intf.req.writedata  = pipe_r.req.writedata  ;
+    assign out_intf.req.burstcount = pipe_r.req.burstcount ;
+    assign out_intf.req.address    = pipe_r.req.address    ;
+    assign out_intf.req.byteenable = pipe_r.req.byteenable ;
+    assign out_intf.req.id         = pipe_r.req.id         ;    
 
     // Upstream stall signal.
     assign in_intf.stall = out_intf.stall & pipe_r.req.request;

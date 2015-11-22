@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -15,7 +15,9 @@
 module cra_ring_root #(
   parameter integer ADDR_W = 32,
   parameter integer DATA_W = 32,
-  parameter integer ID_W = 3
+  parameter integer ID_W = 3,
+  parameter integer ROM_EXT_W = 0,
+  parameter integer ROM_ENABLE = 0
 )
 (
   // clock/reset
@@ -25,7 +27,7 @@ module cra_ring_root #(
   // avalon-slave port
   input logic avs_read,
   input logic avs_write,
-  input logic [ADDR_W+ID_W-1:0] avs_addr,
+  input logic [ADDR_W+ID_W+ROM_EXT_W+ROM_ENABLE-1:0] avs_addr,
   input logic [DATA_W/8-1:0] avs_byteena,
   input logic [DATA_W-1:0] avs_writedata,
   output logic [DATA_W-1:0] avs_readdata,
@@ -43,7 +45,7 @@ module cra_ring_root #(
   // ring-out
   output logic ro_read,
   output logic ro_write,
-  output logic [ADDR_W+ID_W-1:0] ro_addr,
+  output logic [ADDR_W+ID_W+ROM_EXT_W+ROM_ENABLE-1:0] ro_addr,
   output logic [DATA_W-1:0] ro_data,
   output logic [DATA_W/8-1:0] ro_byteena,
   output logic ro_datavalid

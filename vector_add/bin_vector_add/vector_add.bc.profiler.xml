@@ -1,13 +1,12 @@
 <PROFILER>
 	<FUNCTION_LIST>
-		<FUNCTION name="vector_add" num_compute_units="1" filename="/home/ish/tmp/cl/vector_add/device/vector_add.cl"/>
+		<FUNCTION name="vector_add" num_compute_units="1" filename="/home/ish/src/branch/ghub/altera_opencl_sandbox/trunk/vector_add/device/vector_add.cl"/>
 	</FUNCTION_LIST>
 	<MODULE_LIST>
 		<MODULE name="lsu_top" function="" isKernelWrapper="false"/>
 		<MODULE name="st_read" function="" isKernelWrapper="false"/>
 		<MODULE name="st_write" function="" isKernelWrapper="false"/>
 		<MODULE name="vector_add_basic_block_0" function="vector_add" isKernelWrapper="false"/>
-		<MODULE name="vector_add_basic_block_1" function="vector_add" isKernelWrapper="false"/>
 		<MODULE name="vector_add_function" function="vector_add" isKernelWrapper="false"/>
 		<MODULE name="vector_add_function_wrapper" function="vector_add" isKernelWrapper="true"/>
 	</MODULE_LIST>
@@ -41,32 +40,32 @@
 		<PORT cntl_name="profile_extmem_vector_add_function_bank0_port0_write_burst_count_en" incr_name="" tag="profile_extmem_vector_add_function_bank0_port0_write_burst_count_en_vector_add" desc="Mem interface write burst request count" module="vector_add_function_wrapper" flag="0"/>
 	</PORT_LIST>
 	<MODULEINST_LIST>
-		<MODULEINST name="lsu_local_bb1_ld_" function="vector_add" module="lsu_top" attribute="__global;read;STREAMING;MEMORY;32;256;unoptimized">
-			<DEBUG file="/home/ish/tmp/cl/vector_add/device/vector_add.cl" line="31" column="5">
+		<MODULEINST name="lsu_local_bb0_ld_" function="vector_add" module="lsu_top" attribute="__global;read;STREAMING;MEMORY;32;256;unoptimized">
+			<DEBUG file="/home/ish/src/branch/ghub/altera_opencl_sandbox/trunk/vector_add/device/vector_add.cl" line="31" column="5">
 			</DEBUG>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__profile_bw_cntl" incr_name="profile_lsu_local_bb1_ld__profile_bw_incr" port_tag="bandwidth"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__profile_total_ivalid_cntl" incr_name="" port_tag="ivalid"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__profile_avm_readwrite_count_cntl" incr_name="" port_tag="readwritecount"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__profile_avm_burstcount_total_cntl" incr_name="profile_lsu_local_bb1_ld__profile_avm_burstcount_total_incr" port_tag="burstcount"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__profile_avm_stall_cntl" incr_name="" port_tag="memorystalls"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__profile_bw_cntl" incr_name="profile_lsu_local_bb0_ld__profile_bw_incr" port_tag="bandwidth"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__profile_total_ivalid_cntl" incr_name="" port_tag="ivalid"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__profile_avm_readwrite_count_cntl" incr_name="" port_tag="readwritecount"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__profile_avm_burstcount_total_cntl" incr_name="profile_lsu_local_bb0_ld__profile_avm_burstcount_total_incr" port_tag="burstcount"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__profile_avm_stall_cntl" incr_name="" port_tag="memorystalls"/>
 		</MODULEINST>
-		<MODULEINST name="lsu_local_bb1_ld__u0" function="vector_add" module="lsu_top" attribute="__global;read;STREAMING;MEMORY;32;256;unoptimized">
-			<DEBUG file="/home/ish/tmp/cl/vector_add/device/vector_add.cl" line="31" column="5">
+		<MODULEINST name="lsu_local_bb0_ld__u0" function="vector_add" module="lsu_top" attribute="__global;read;STREAMING;MEMORY;32;256;unoptimized">
+			<DEBUG file="/home/ish/src/branch/ghub/altera_opencl_sandbox/trunk/vector_add/device/vector_add.cl" line="31" column="5">
 			</DEBUG>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__u0_profile_bw_cntl" incr_name="profile_lsu_local_bb1_ld__u0_profile_bw_incr" port_tag="bandwidth"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__u0_profile_total_ivalid_cntl" incr_name="" port_tag="ivalid"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__u0_profile_avm_readwrite_count_cntl" incr_name="" port_tag="readwritecount"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__u0_profile_avm_burstcount_total_cntl" incr_name="profile_lsu_local_bb1_ld__u0_profile_avm_burstcount_total_incr" port_tag="burstcount"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_ld__u0_profile_avm_stall_cntl" incr_name="" port_tag="memorystalls"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__u0_profile_bw_cntl" incr_name="profile_lsu_local_bb0_ld__u0_profile_bw_incr" port_tag="bandwidth"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__u0_profile_total_ivalid_cntl" incr_name="" port_tag="ivalid"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__u0_profile_avm_readwrite_count_cntl" incr_name="" port_tag="readwritecount"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__u0_profile_avm_burstcount_total_cntl" incr_name="profile_lsu_local_bb0_ld__u0_profile_avm_burstcount_total_incr" port_tag="burstcount"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_ld__u0_profile_avm_stall_cntl" incr_name="" port_tag="memorystalls"/>
 		</MODULEINST>
-		<MODULEINST name="lsu_local_bb1_st_add" function="vector_add" module="lsu_top" attribute="__global;write;STREAMING;MEMORY;32;256;unoptimized">
-			<DEBUG file="/home/ish/tmp/cl/vector_add/device/vector_add.cl" line="31" column="5">
+		<MODULEINST name="lsu_local_bb0_st_add" function="vector_add" module="lsu_top" attribute="__global;write;STREAMING;MEMORY;32;256;unoptimized">
+			<DEBUG file="/home/ish/src/branch/ghub/altera_opencl_sandbox/trunk/vector_add/device/vector_add.cl" line="31" column="5">
 			</DEBUG>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_st_add_profile_bw_cntl" incr_name="profile_lsu_local_bb1_st_add_profile_bw_incr" port_tag="bandwidth"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_st_add_profile_total_ivalid_cntl" incr_name="" port_tag="ivalid"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_st_add_profile_avm_readwrite_count_cntl" incr_name="" port_tag="readwritecount"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_st_add_profile_avm_burstcount_total_cntl" incr_name="profile_lsu_local_bb1_st_add_profile_avm_burstcount_total_incr" port_tag="burstcount"/>
-			<SIGNAL cntl_name="profile_lsu_local_bb1_st_add_profile_avm_stall_cntl" incr_name="" port_tag="memorystalls"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_st_add_profile_bw_cntl" incr_name="profile_lsu_local_bb0_st_add_profile_bw_incr" port_tag="bandwidth"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_st_add_profile_total_ivalid_cntl" incr_name="" port_tag="ivalid"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_st_add_profile_avm_readwrite_count_cntl" incr_name="" port_tag="readwritecount"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_st_add_profile_avm_burstcount_total_cntl" incr_name="profile_lsu_local_bb0_st_add_profile_avm_burstcount_total_incr" port_tag="burstcount"/>
+			<SIGNAL cntl_name="profile_lsu_local_bb0_st_add_profile_avm_stall_cntl" incr_name="" port_tag="memorystalls"/>
 		</MODULEINST>
 		<MODULEINST name="vector_add_function_inst" function="vector_add" module="vector_add_function" attribute="vector_add">
 			<SIGNAL cntl_name="profile_clock" incr_name="" port_tag="clock_vector_add_function"/>
@@ -79,21 +78,21 @@
 		</MODULEINST>
 	</MODULEINST_LIST>
 	<CONNECTION_LIST>
-		<CONNECTION moduleinst="lsu_local_bb1_ld_" function="vector_add" compute_unit="0" port_tag="bandwidth"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld_" function="vector_add" compute_unit="0" port_tag="ivalid"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld_" function="vector_add" compute_unit="0" port_tag="readwritecount"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld_" function="vector_add" compute_unit="0" port_tag="burstcount"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld_" function="vector_add" compute_unit="0" port_tag="memorystalls"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld__u0" function="vector_add" compute_unit="0" port_tag="bandwidth"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld__u0" function="vector_add" compute_unit="0" port_tag="ivalid"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld__u0" function="vector_add" compute_unit="0" port_tag="readwritecount"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld__u0" function="vector_add" compute_unit="0" port_tag="burstcount"/>
-		<CONNECTION moduleinst="lsu_local_bb1_ld__u0" function="vector_add" compute_unit="0" port_tag="memorystalls"/>
-		<CONNECTION moduleinst="lsu_local_bb1_st_add" function="vector_add" compute_unit="0" port_tag="bandwidth"/>
-		<CONNECTION moduleinst="lsu_local_bb1_st_add" function="vector_add" compute_unit="0" port_tag="ivalid"/>
-		<CONNECTION moduleinst="lsu_local_bb1_st_add" function="vector_add" compute_unit="0" port_tag="readwritecount"/>
-		<CONNECTION moduleinst="lsu_local_bb1_st_add" function="vector_add" compute_unit="0" port_tag="burstcount"/>
-		<CONNECTION moduleinst="lsu_local_bb1_st_add" function="vector_add" compute_unit="0" port_tag="memorystalls"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld_" function="vector_add" compute_unit="0" port_tag="bandwidth"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld_" function="vector_add" compute_unit="0" port_tag="ivalid"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld_" function="vector_add" compute_unit="0" port_tag="readwritecount"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld_" function="vector_add" compute_unit="0" port_tag="burstcount"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld_" function="vector_add" compute_unit="0" port_tag="memorystalls"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld__u0" function="vector_add" compute_unit="0" port_tag="bandwidth"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld__u0" function="vector_add" compute_unit="0" port_tag="ivalid"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld__u0" function="vector_add" compute_unit="0" port_tag="readwritecount"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld__u0" function="vector_add" compute_unit="0" port_tag="burstcount"/>
+		<CONNECTION moduleinst="lsu_local_bb0_ld__u0" function="vector_add" compute_unit="0" port_tag="memorystalls"/>
+		<CONNECTION moduleinst="lsu_local_bb0_st_add" function="vector_add" compute_unit="0" port_tag="bandwidth"/>
+		<CONNECTION moduleinst="lsu_local_bb0_st_add" function="vector_add" compute_unit="0" port_tag="ivalid"/>
+		<CONNECTION moduleinst="lsu_local_bb0_st_add" function="vector_add" compute_unit="0" port_tag="readwritecount"/>
+		<CONNECTION moduleinst="lsu_local_bb0_st_add" function="vector_add" compute_unit="0" port_tag="burstcount"/>
+		<CONNECTION moduleinst="lsu_local_bb0_st_add" function="vector_add" compute_unit="0" port_tag="memorystalls"/>
 		<CONNECTION moduleinst="vector_add_function_inst" function="vector_add" compute_unit="0" port_tag="clock_vector_add_function"/>
 		<CONNECTION moduleinst="vector_add_function_wrapper_inst" function="vector_add" compute_unit="0" port_tag="profile_extmem_vector_add_function_bank0_port0_read_data_inc_en_vector_add"/>
 		<CONNECTION moduleinst="vector_add_function_wrapper_inst" function="vector_add" compute_unit="0" port_tag="profile_extmem_vector_add_function_bank0_port0_read_burst_count_en_vector_add"/>

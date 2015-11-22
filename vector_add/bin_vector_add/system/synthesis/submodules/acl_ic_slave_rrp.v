@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -63,8 +63,11 @@ module acl_ic_slave_rrp #(
                 slave_read_pipe <= 'x;
                 slave_read_pipe.valid <= 1'b0;
             end
-            else
-                slave_read_pipe <= slave_read_in;
+            else begin
+                if (m_intf.req.enable) begin
+                    slave_read_pipe <= slave_read_in;
+                end
+            end
 
         assign slave_read = slave_read_pipe;
     end
@@ -94,6 +97,10 @@ module acl_ic_slave_rrp #(
         raw_read_item m_raw_read_item, rf_raw_read_item;
         read_item rf_read_item, cur_read_item;
 
+        if (READ_FIFO_DEPTH == 1)
+        begin
+          assign rf_raw_read_item = m_raw_read_item;
+        end
         // FIFO of pending reads.
         // Two parts to this FIFO:
         //  1. An actual FIFO (either llfifo or scfifo).
@@ -102,7 +109,7 @@ module acl_ic_slave_rrp #(
         // Together, there must be at least READ_FIFO_DEPTH
         // entries. Since cur_read_item counts as one,
         // the actual FIFOs are sized to READ_FIFO_DEPTH-1.
-        if( USE_LL_FIFO == 1 )
+        else if( USE_LL_FIFO == 1 )
         begin
             acl_ll_fifo #(
                 .WIDTH( $bits(raw_read_item) ),
@@ -151,10 +158,10 @@ module acl_ic_slave_rrp #(
         assign rf_read_item.burstcount = rf_raw_read_item.burstcount;
 
         // Place incoming read requests from the master into read FIFO.
-        assign rf_write = ~m_intf.stall & m_intf.req.read;
+        assign rf_write = ~m_intf.stall & m_intf.req.read & m_intf.req.enable;
 
         // Read next item from the FIFO.
-        assign rf_read = ~rf_empty & (~rf_read_item.valid | next_read_item);
+        assign rf_read = ~rf_empty & (~rf_read_item.valid | next_read_item) & m_intf.req.enable;
 
         // Determine when cur_read_item can be updated, which is controlled by next_read_item.
         assign next_read_item = ~cur_read_item.valid | (slave_read.valid & (cur_read_item.burstcount == 1));
@@ -173,14 +180,14 @@ module acl_ic_slave_rrp #(
             end
             else
             begin
-                // Handle incoming data from the slave.
-                if( slave_read.valid )
-                    cur_read_item.burstcount <= cur_read_item.burstcount - 1;
-
-                // Update current read from the read FIFO. This logic takes priority over
-                // the logic above (both update cur_read_item.burstcount).
-                if( next_read_item )
+                if( next_read_item & m_intf.req.enable) begin
+                    // Update current read from the read FIFO.
                     cur_read_item <= rf_read_item;
+                end else if( slave_read.valid & m_intf.req.enable) begin
+                    // Handle incoming data from the slave.
+                    cur_read_item.burstcount <= cur_read_item.burstcount - 1;
+                end
+
             end
         end
 
@@ -189,9 +196,12 @@ module acl_ic_slave_rrp #(
         assign rrp_intf.data = slave_read.data;
         assign rrp_intf.id = cur_read_item.id;
 
+        if (READ_FIFO_DEPTH == 1) begin
+          assign rf_read_item.valid = rf_write;
+        end
         // Handle the rf_read_item.valid signal. Different behavior between
         // sc_fifo and acl_ll_fifo.
-        if( USE_LL_FIFO == 1 )
+        else if( USE_LL_FIFO == 1 )
         begin
             // The data is already at the output of the acl_ll_fifo, so the
             // data is valid as long as the FIFO is not empty.
@@ -205,9 +215,9 @@ module acl_ic_slave_rrp #(
             begin
                 if( !resetn )
                     rf_read_item.valid <= 1'b0;
-                else if( rf_read )
+                else if( rf_read & m_intf.req.enable)
                     rf_read_item.valid <= 1'b1;
-                else if( next_read_item & ~rf_read )
+                else if( next_read_item & ~rf_read & & m_intf.req.enable)
                     rf_read_item.valid <= 1'b0;
             end
         end

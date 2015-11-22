@@ -26,15 +26,6 @@ var spvData = '
               , "line":"0"
               , "order":0
             }
-            ,
-            {
-              "type":"bb"
-              , "id2":4
-              , "name":"Basic Block 1"
-              , "file":""
-              , "line":"0"
-              , "order":1
-            }
           ]
         }
       ]

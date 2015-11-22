@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -18,6 +18,9 @@
 module acl_id_iterator
 #(
   parameter WIDTH = 32,    // width of all the counters
+  parameter LOCAL_WIDTH_X = 32,
+  parameter LOCAL_WIDTH_Y = 32,
+  parameter LOCAL_WIDTH_Z = 32,
   parameter ENABLE_TESSELLATION = 0
 )
 
@@ -141,7 +144,10 @@ module acl_id_iterator
   
   acl_work_item_iterator #(
     .WIDTH(WIDTH),
-    .ENABLE_TESSELLATION(ENABLE_TESSELLATION)
+    .LOCAL_WIDTH_X  (LOCAL_WIDTH_X ),
+    .LOCAL_WIDTH_Y  (LOCAL_WIDTH_Y ),
+    .LOCAL_WIDTH_Z  (LOCAL_WIDTH_Z ),
+    .ENABLE_TESSELLATION (ENABLE_TESSELLATION)
   ) work_item_iterator (
     .clock(clock),
     .resetn(resetn),
@@ -174,3 +180,6 @@ module acl_id_iterator
   end
   
 endmodule
+
+// vim:set filetype=verilog:
+

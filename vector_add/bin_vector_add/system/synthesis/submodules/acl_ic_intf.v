@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -41,6 +41,7 @@ interface acl_ic_master_intf #(
     // Arbitration.
     struct packed {
         struct packed {
+            logic enable;
             logic request;
             logic read;
             logic write;

@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -29,7 +29,13 @@
 //      global_id[0] * global_id[1] * global_id[2] times between times
 //      that "start" is asserted.
 
-module acl_work_item_iterator #(parameter WIDTH=32, parameter ENABLE_TESSELLATION=0) (
+module acl_work_item_iterator #(
+   parameter WIDTH=32,
+   parameter LOCAL_WIDTH_X = 32,
+   parameter LOCAL_WIDTH_Y = 32,
+   parameter LOCAL_WIDTH_Z = 32,
+   parameter ENABLE_TESSELLATION=0
+) (
    input clock,
    input resetn,
    input start,         // Assert to restart the iterators
@@ -42,7 +48,7 @@ module acl_work_item_iterator #(parameter WIDTH=32, parameter ENABLE_TESSELLATIO
    input [WIDTH-1:0] global_id_base[2:0],
    
    // The counter values we export.
-   output reg [WIDTH-1:0] local_id[2:0],
+   output     [WIDTH-1:0] local_id[2:0],
    output reg [WIDTH-1:0] global_id[2:0],
    
    // output to id_iterator
@@ -51,6 +57,13 @@ module acl_work_item_iterator #(parameter WIDTH=32, parameter ENABLE_TESSELLATIO
    input input_enable
 );
 
+reg [LOCAL_WIDTH_X-1:0] local_id_0;
+reg [LOCAL_WIDTH_Y-1:0] local_id_1;
+reg [LOCAL_WIDTH_Z-1:0] local_id_2;
+
+assign local_id[0] = {{(WIDTH-LOCAL_WIDTH_X){1'b0}}, local_id_0};
+assign local_id[1] = {{(WIDTH-LOCAL_WIDTH_Y){1'b0}}, local_id_1};
+assign local_id[2] = {{(WIDTH-LOCAL_WIDTH_Z){1'b0}}, local_id_2};
 
 // This is the invariant relationship between the various ids.
 // Keep these around for debugging.
@@ -72,42 +85,45 @@ endfunction
 
 //////////////////////////////////
 // Handle local ids.
-reg [WIDTH-1:0] max_local_id[2:0];
+reg [LOCAL_WIDTH_X-1:0] max_local_id_0;
+reg [LOCAL_WIDTH_Y-1:0] max_local_id_1;
+reg [LOCAL_WIDTH_Z-1:0] max_local_id_2;
+
 wire last_local_id[2:0];
-assign last_local_id[0] = (local_id[0] == max_local_id[0] );
-assign last_local_id[1] = (local_id[1] == max_local_id[1] );
-assign last_local_id[2] = (local_id[2] == max_local_id[2] );
+assign last_local_id[0] = (local_id_0 == max_local_id_0);
+assign last_local_id[1] = (local_id_1 == max_local_id_1);
+assign last_local_id[2] = (local_id_2 == max_local_id_2);
 
 assign last_in_group = last_local_id[0] & last_local_id[1] & last_local_id[2];
 
 wire bump_local_id[2:0];
 wire bump_local_id_reg[2:0];
-assign bump_local_id[0] = (max_local_id[0] != 0);
-assign bump_local_id[1] = (max_local_id[1] != 0) && last_local_id[0];
-assign bump_local_id[2] = (max_local_id[2] != 0) && last_local_id[0] && last_local_id[1];
+assign bump_local_id[0] = (max_local_id_0 != 0);
+assign bump_local_id[1] = (max_local_id_1 != 0) && last_local_id[0];
+assign bump_local_id[2] = (max_local_id_2 != 0) && last_local_id[0] && last_local_id[1];
 
 // Local id register updates.
 always @(posedge clock or negedge resetn) begin
    if ( ~resetn ) begin
-      local_id[0] <= {WIDTH{1'b0}};
-      local_id[1] <= {WIDTH{1'b0}};
-      local_id[2] <= {WIDTH{1'b0}};
-      max_local_id[0] <= {WIDTH{1'b0}};
-      max_local_id[1] <= {WIDTH{1'b0}};
-      max_local_id[2] <= {WIDTH{1'b0}};		
+      local_id_0 <= {LOCAL_WIDTH_X{1'b0}};
+      local_id_1 <= {LOCAL_WIDTH_Y{1'b0}};
+      local_id_2 <= {LOCAL_WIDTH_Z{1'b0}};
+      max_local_id_0 <= {LOCAL_WIDTH_X{1'b0}};
+      max_local_id_1 <= {LOCAL_WIDTH_Y{1'b0}};
+      max_local_id_2 <= {LOCAL_WIDTH_Z{1'b0}};		
    end else if ( start ) begin
-      local_id[0] <= {WIDTH{1'b0}};
-      local_id[1] <= {WIDTH{1'b0}};
-      local_id[2] <= {WIDTH{1'b0}};
-      max_local_id[0] <= local_size[0] - 2'b01;
-      max_local_id[1] <= local_size[1] - 2'b01;
-      max_local_id[2] <= local_size[2] - 2'b01;		
+      local_id_0 <= {LOCAL_WIDTH_X{1'b0}};
+      local_id_1 <= {LOCAL_WIDTH_Y{1'b0}};
+      local_id_2 <= {LOCAL_WIDTH_Z{1'b0}};
+      max_local_id_0 <= local_size[0][LOCAL_WIDTH_X-1:0]- 1;
+      max_local_id_1 <= local_size[1][LOCAL_WIDTH_Y-1:0]- 1;
+      max_local_id_2 <= local_size[2][LOCAL_WIDTH_Z-1:0]- 1;		
    end else // We presume that start and issue are mutually exclusive.
    begin
       if ( issue ) begin
-         local_id[0] <= incr_lid (local_id[0], bump_local_id[0], last_local_id[0]);
-         local_id[1] <= incr_lid (local_id[1], bump_local_id[1], last_local_id[1]);
-         local_id[2] <= incr_lid (local_id[2], bump_local_id[2], last_local_id[2]);
+         local_id_0 <= incr_lid (local_id_0, bump_local_id[0], last_local_id[0]);
+         local_id_1 <= incr_lid (local_id_1, bump_local_id[1], last_local_id[1]);
+         local_id_2 <= incr_lid (local_id_2, bump_local_id[2], last_local_id[2]);
       end
    end
 end
@@ -143,6 +159,12 @@ wire [WIDTH-1:0] bump_add[2:0];
 wire [WIDTH-1:0] bump_add_reg[2:0];
 wire just_seen_last_in_group_reg;
 wire [WIDTH-1:0] global_id_base_reg[2:0];
+
+wire [WIDTH-1:0] max_local_id[2:0];
+
+assign max_local_id[0] = {{(WIDTH-LOCAL_WIDTH_X){1'b0}}, max_local_id_0};
+assign max_local_id[1] = {{(WIDTH-LOCAL_WIDTH_Y){1'b0}}, max_local_id_1};
+assign max_local_id[2] = {{(WIDTH-LOCAL_WIDTH_Z){1'b0}}, max_local_id_2};
 
 genvar i;
 generate

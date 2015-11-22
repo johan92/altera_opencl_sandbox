@@ -29,6 +29,7 @@ parameter CACHE_SIZE_N=1024;                   // Cache depth (width = WIDTH_BYT
 parameter ACL_PROFILE = 0;                     // Profiler
 parameter HIGH_FMAX = 1;                       // Add pipeline to io if set to 1
 parameter UNALIGNED = 0;                       // Output word unaligned
+parameter INTENDED_DEVICE_FAMILY = "Stratix V";
 
 /*****************
 * Local Parameters *
@@ -177,24 +178,53 @@ generate
       else cache_status_ready <= flush_cnt[CACHE_ADDR_W];
     end
 
-    always @ (posedge clk)  begin
-      R_flush <= flush;
-      if(flush & !R_flush)  flush_cnt <= '0;
-      else if(!flush_cnt[CACHE_ADDR_W]) flush_cnt <= flush_cnt + 1'b1;
-      cache_ready <= flush_cnt[CACHE_ADDR_W];
+    if ( INTENDED_DEVICE_FAMILY=="Arria 10" ) begin
 
-      if(!flush_cnt[CACHE_ADDR_W]) cache[flush_cnt] <= '0;
-      else if(update_cache) cache[wr_c_index] <= {1'b1, new_tag};
+      always @ (posedge clk)  begin
+        R_flush <= flush;
+        if(flush & !R_flush)  flush_cnt <= '0;
+        else if(!flush_cnt[CACHE_ADDR_W]) flush_cnt <= flush_cnt + 1'b1;
+        cache_ready <= flush_cnt[CACHE_ADDR_W];
+  
+        if( (!flush_cnt[CACHE_ADDR_W]) || update_cache) begin
+          cache[(!flush_cnt[CACHE_ADDR_W]) ? flush_cnt : wr_c_index] <=
+  	                  (!flush_cnt[CACHE_ADDR_W]) ? '0 : {1'b1, new_tag};
+        end
+  
+        in_cache[0] <= R_valid & (in_cache_pre[0] | R_nop) & !issue_2nd_word;
+        in_cache[1] <= UNALIGNED? R_valid & (in_cache_pre[1] | R_nop) & !issue_2nd_word & need_2_page : 1'b0;
+  
+        include_2nd_part <= issue_2nd_word | in_cache_pre[1] & need_2_page;
+        p_valid <= issue_2nd_word | R_valid & !in_cache_pre[0] & !R_nop; // not include nop
+        p_offset_valid <= issue_2nd_word | R_valid;
+        p_addr <= lsu_i_address;
+        R_cache_addr <= lsu_i_address[MB_W+CACHE_ADDR_W-1:MB_W];
+      end
 
-      in_cache[0] <= R_valid & (in_cache_pre[0] | R_nop) & !issue_2nd_word;
-      in_cache[1] <= UNALIGNED? R_valid & (in_cache_pre[1] | R_nop) & !issue_2nd_word & need_2_page : 1'b0;
-
-      include_2nd_part <= issue_2nd_word | in_cache_pre[1] & need_2_page;
-      p_valid <= issue_2nd_word | R_valid & !in_cache_pre[0] & !R_nop; // not include nop
-      p_offset_valid <= issue_2nd_word | R_valid;
-      p_addr <= lsu_i_address;
-      R_cache_addr <= lsu_i_address[MB_W+CACHE_ADDR_W-1:MB_W];
     end
+    else begin
+
+      always @ (posedge clk)  begin
+        R_flush <= flush;
+        if(flush & !R_flush)  flush_cnt <= '0;
+        else if(!flush_cnt[CACHE_ADDR_W]) flush_cnt <= flush_cnt + 1'b1;
+        cache_ready <= flush_cnt[CACHE_ADDR_W];
+  
+        if(!flush_cnt[CACHE_ADDR_W]) cache[flush_cnt] <= '0;
+        else if(update_cache) cache[wr_c_index] <= {1'b1, new_tag};
+  
+        in_cache[0] <= R_valid & (in_cache_pre[0] | R_nop) & !issue_2nd_word;
+        in_cache[1] <= UNALIGNED? R_valid & (in_cache_pre[1] | R_nop) & !issue_2nd_word & need_2_page : 1'b0;
+  
+        include_2nd_part <= issue_2nd_word | in_cache_pre[1] & need_2_page;
+        p_valid <= issue_2nd_word | R_valid & !in_cache_pre[0] & !R_nop; // not include nop
+        p_offset_valid <= issue_2nd_word | R_valid;
+        p_addr <= lsu_i_address;
+        R_cache_addr <= lsu_i_address[MB_W+CACHE_ADDR_W-1:MB_W];
+      end
+
+    end
+
     if(OFFSET_WIDTH > 0)  begin
       always @ (posedge clk)  begin
         p_offset <= R_addr[MB_W-1:MB_W-OFFSET_WIDTH];

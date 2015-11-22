@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -28,6 +28,7 @@ module acl_ic_mem_router #(
     input logic [NUM_BANKS-1:0] bank_select,
 
     // Master
+    input logic m_arb_enable,
     input logic m_arb_request,
     input logic m_arb_read,
     input logic m_arb_write,
@@ -44,6 +45,7 @@ module acl_ic_mem_router #(
     output logic [DATA_W-1:0] m_rrp_data,
 
     // To each bank
+    output logic b_arb_enable  [NUM_BANKS],
     output logic b_arb_request [NUM_BANKS],
     output logic b_arb_read [NUM_BANKS],
     output logic b_arb_write [NUM_BANKS],
@@ -79,6 +81,7 @@ module acl_ic_mem_router #(
 
         for( i = 0; i < NUM_BANKS; i = i + 1 )
         begin:bank
+	    b_arb_enable[i] = m_arb_enable;
             b_arb_request[i] = m_arb_request & bank_select[i] & none_pending(i);
             b_arb_read[i] = m_arb_read & bank_select[i] & none_pending(i);
             b_arb_write[i] = m_arb_write & bank_select[i] & none_pending(i);

@@ -1,6 +1,6 @@
-// $File: //acds/rel/14.1/ip/sopc/components/altera_avalon_dc_fifo/altera_avalon_dc_fifo.v $
+// $File: //acds/rel/15.1/ip/sopc/components/altera_avalon_dc_fifo/altera_avalon_dc_fifo.v $
 // $Revision: #1 $
-// $Date: 2014/10/06 $
+// $Date: 2015/08/09 $
 // $Author: swbranch $
 //-------------------------------------------------------------------------------
 // Description: Dual clocked single channel FIFO with fill levels and status

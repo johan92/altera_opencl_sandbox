@@ -1,6 +1,6 @@
 Flow report for top
-Sat Oct 17 21:38:28 2015
-Quartus II 64-Bit Version 14.1.0 Build 186 12/03/2014 SJ Full Version
+Sun Nov 22 13:20:52 2015
+Quartus Prime Version 15.1.0 Build 185 10/21/2015 SJ Standard Edition
 
 
 ---------------------
@@ -21,14 +21,14 @@ Quartus II 64-Bit Version 14.1.0 Build 186 12/03/2014 SJ Full Version
 ----------------
 ; Legal Notice ;
 ----------------
-Copyright (C) 1991-2014 Altera Corporation. All rights reserved.
+Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
 Your use of Altera Corporation's design tools, logic functions 
 and other software and tools, and its AMPP partner logic 
 functions, and any output files from any of the foregoing 
 (including device programming or simulation files), and any 
 associated documentation or information are expressly subject 
 to the terms and conditions of the Altera Program License 
-Subscription Agreement, the Altera Quartus II License Agreement,
+Subscription Agreement, the Altera Quartus Prime License Agreement,
 the Altera MegaCore Function License Agreement, or other 
 applicable license agreement, including, without limitation, 
 that your use is for the sole purpose of programming logic 
@@ -38,29 +38,29 @@ agreement for further details.
 
 
 
-+-------------------------------------------------------------------------------+
-; Flow Summary                                                                  ;
-+---------------------------------+---------------------------------------------+
-; Flow Status                     ; Successful - Sat Oct 17 21:37:44 2015       ;
-; Quartus II 64-Bit Version       ; 14.1.0 Build 186 12/03/2014 SJ Full Version ;
-; Revision Name                   ; top                                         ;
-; Top-level Entity Name           ; top                                         ;
-; Family                          ; Cyclone V                                   ;
-; Device                          ; 5CSEMA5F31C6                                ;
-; Timing Models                   ; Final                                       ;
-; Logic utilization (in ALMs)     ; 5,570 / 32,070 ( 17 % )                     ;
-; Total registers                 ; 9685                                        ;
-; Total pins                      ; 103 / 457 ( 23 % )                          ;
-; Total virtual pins              ; 0                                           ;
-; Total block memory bits         ; 127,344 / 4,065,280 ( 3 % )                 ;
-; Total DSP Blocks                ; 0 / 87 ( 0 % )                              ;
-; Total HSSI RX PCSs              ; 0                                           ;
-; Total HSSI PMA RX Deserializers ; 0                                           ;
-; Total HSSI TX PCSs              ; 0                                           ;
-; Total HSSI PMA TX Serializers   ; 0                                           ;
-; Total PLLs                      ; 2 / 6 ( 33 % )                              ;
-; Total DLLs                      ; 1 / 4 ( 25 % )                              ;
-+---------------------------------+---------------------------------------------+
++-----------------------------------------------------------------------------------+
+; Flow Summary                                                                      ;
++---------------------------------+-------------------------------------------------+
+; Flow Status                     ; Successful - Sun Nov 22 13:20:09 2015           ;
+; Quartus Prime Version           ; 15.1.0 Build 185 10/21/2015 SJ Standard Edition ;
+; Revision Name                   ; top                                             ;
+; Top-level Entity Name           ; top                                             ;
+; Family                          ; Cyclone V                                       ;
+; Device                          ; 5CSEMA5F31C6                                    ;
+; Timing Models                   ; Final                                           ;
+; Logic utilization (in ALMs)     ; 5,472 / 32,070 ( 17 % )                         ;
+; Total registers                 ; 10409                                           ;
+; Total pins                      ; 103 / 457 ( 23 % )                              ;
+; Total virtual pins              ; 0                                               ;
+; Total block memory bits         ; 127,344 / 4,065,280 ( 3 % )                     ;
+; Total DSP Blocks                ; 0 / 87 ( 0 % )                                  ;
+; Total HSSI RX PCSs              ; 0                                               ;
+; Total HSSI PMA RX Deserializers ; 0                                               ;
+; Total HSSI TX PCSs              ; 0                                               ;
+; Total HSSI PMA TX Serializers   ; 0                                               ;
+; Total PLLs                      ; 2 / 6 ( 33 % )                                  ;
+; Total DLLs                      ; 1 / 4 ( 25 % )                                  ;
++---------------------------------+-------------------------------------------------+
 
 
 +-----------------------------------------+
@@ -68,7 +68,7 @@ agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 10/17/2015 21:27:50 ;
+; Start date & time ; 11/22/2015 13:09:18 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; top                 ;
 +-------------------+---------------------+
@@ -81,7 +81,7 @@ agreement for further details.
 +-------------------------------------------------+----------------------------------------------------------------------+---------------+------------------------------------+---------------------+
 ; ALLOW_SHIFT_REGISTER_MERGING_ACROSS_HIERARCHIES ; Off                                                                  ; Auto          ; --                                 ; --                  ;
 ; AUTO_PARALLEL_SYNTHESIS                         ; Off                                                                  ; On            ; --                                 ; --                  ;
-; COMPILER_SIGNATURE_ID                           ; 233360581987858.144510647017572                                      ; --            ; --                                 ; --                  ;
+; COMPILER_SIGNATURE_ID                           ; 233360581987858.144818695812839                                      ; --            ; --                                 ; --                  ;
 ; DISABLE_REGISTER_MERGING_ACROSS_HIERARCHIES     ; On                                                                   ; Auto          ; --                                 ; --                  ;
 ; FITTER_EFFORT                                   ; Standard Fit                                                         ; Auto Fit      ; --                                 ; --                  ;
 ; FIT_ONLY_ONE_ATTEMPT                            ; On                                                                   ; Off           ; --                                 ; --                  ;
@@ -117,16 +117,17 @@ agreement for further details.
 ; MISC_FILE                                       ; system/synthesis/submodules/sequencer/sequencer_defines.pre.h        ; --            ; --                                 ; --                  ;
 ; MISC_FILE                                       ; system/synthesis/submodules/hps.pre.xml                              ; --            ; --                                 ; --                  ;
 ; OPTIMIZATION_TECHNIQUE                          ; Speed                                                                ; Balanced      ; --                                 ; --                  ;
-; PARTITION_COLOR                                 ; 16764057                                                             ; --            ; --                                 ; Top                 ;
 ; PARTITION_COLOR                                 ; 39423                                                                ; --            ; --                                 ; acl_iface_partition ;
+; PARTITION_COLOR                                 ; 16764057                                                             ; --            ; --                                 ; Top                 ;
 ; PARTITION_FITTER_PRESERVATION_LEVEL             ; PLACEMENT_AND_ROUTING                                                ; --            ; --                                 ; Top                 ;
 ; PARTITION_NETLIST_TYPE                          ; SOURCE                                                               ; --            ; --                                 ; Top                 ;
 ; PLACEMENT_EFFORT_MULTIPLIER                     ; 4.0                                                                  ; 1.0           ; --                                 ; --                  ;
 ; POST_FLOW_SCRIPT_FILE                           ; quartus_cdb:scripts/post_flow.tcl                                    ; --            ; --                                 ; --                  ;
 ; ROUTER_TIMING_OPTIMIZATION_LEVEL                ; MAXIMUM                                                              ; Normal        ; --                                 ; --                  ;
 ; SEARCH_PATH                                     ; iface                                                                ; --            ; --                                 ; --                  ;
-; SEARCH_PATH                                     ; /home/ish/altera/14.1/hld/ip                                         ; --            ; --                                 ; --                  ;
+; SEARCH_PATH                                     ; /home/ish/altera/15.1/hld/ip                                         ; --            ; --                                 ; --                  ;
 ; SYNTHESIS_ONLY_QIP                              ; On                                                                   ; --            ; --                                 ; --                  ;
+; VERILOG_CONSTANT_LOOP_LIMIT                     ; 10000                                                                ; 5000          ; --                                 ; --                  ;
 ; VERILOG_INPUT_VERSION                           ; SystemVerilog_2005                                                   ; Verilog_2001  ; --                                 ; --                  ;
 +-------------------------------------------------+----------------------------------------------------------------------+---------------+------------------------------------+---------------------+
 
@@ -136,13 +137,13 @@ agreement for further details.
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name               ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis      ; 00:01:35     ; 1.1                     ; 1562 MB             ; 00:01:49                           ;
-; Fitter                    ; 00:03:45     ; 2.0                     ; 2990 MB             ; 00:06:56                           ;
-; TimeQuest Timing Analyzer ; 00:00:51     ; 2.7                     ; 1872 MB             ; 00:01:32                           ;
-; MIF/HEX Update            ; 00:00:16     ; 1.0                     ; 1353 MB             ; 00:00:16                           ;
-; Assembler                 ; 00:00:17     ; 1.0                     ; 1034 MB             ; 00:00:16                           ;
-; TimeQuest Timing Analyzer ; 00:00:38     ; 2.0                     ; 1416 MB             ; 00:00:42                           ;
-; Total                     ; 00:07:22     ; --                      ; --                  ; 00:11:31                           ;
+; Analysis & Synthesis      ; 00:01:30     ; 1.0                     ; 1891 MB             ; 00:01:41                           ;
+; Fitter                    ; 00:04:32     ; 1.6                     ; 3409 MB             ; 00:09:14                           ;
+; TimeQuest Timing Analyzer ; 00:00:48     ; 1.9                     ; 2145 MB             ; 00:01:27                           ;
+; MIF/HEX Update            ; 00:00:17     ; 1.0                     ; 1646 MB             ; 00:00:17                           ;
+; Assembler                 ; 00:00:17     ; 1.0                     ; 1303 MB             ; 00:00:17                           ;
+; TimeQuest Timing Analyzer ; 00:00:32     ; 1.0                     ; 1700 MB             ; 00:00:37                           ;
+; Total                     ; 00:07:56     ; --                      ; --                  ; 00:13:33                           ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 

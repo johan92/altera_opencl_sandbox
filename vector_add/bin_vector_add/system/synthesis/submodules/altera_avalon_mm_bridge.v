@@ -1,4 +1,4 @@
-// (C) 2001-2014 Altera Corporation. All rights reserved.
+// (C) 2001-2015 Altera Corporation. All rights reserved.
 // Your use of Altera Corporation's design tools, logic functions and other 
 // software and tools, and its AMPP partner logic functions, and any output 
 // files any of the foregoing (including device programming or simulation 
@@ -11,9 +11,9 @@
 // agreement for further details.
 
 
-// $Id: //acds/rel/14.1/ip/merlin/altera_avalon_mm_bridge/altera_avalon_mm_bridge.v#1 $
+// $Id: //acds/rel/15.1/ip/merlin/altera_avalon_mm_bridge/altera_avalon_mm_bridge.v#1 $
 // $Revision: #1 $
-// $Date: 2014/10/06 $
+// $Date: 2015/08/09 $
 // $Author: swbranch $
 // --------------------------------------
 // Avalon-MM pipeline bridge
@@ -26,6 +26,7 @@ module altera_avalon_mm_bridge
 #(
     parameter DATA_WIDTH           = 32,
     parameter SYMBOL_WIDTH         = 8,
+    parameter RESPONSE_WIDTH       = 2,
     parameter HDL_ADDR_WIDTH       = 10,
     parameter BURSTCOUNT_WIDTH     = 1,
 
@@ -38,30 +39,32 @@ module altera_avalon_mm_bridge
     parameter BYTEEN_WIDTH = DATA_WIDTH / SYMBOL_WIDTH
 )
 (
-    input                           clk,
-    input                           reset,
+    input                         clk,
+    input                         reset,
 
-    output                          s0_waitrequest,
-    output [DATA_WIDTH-1:0]         s0_readdata,
-    output                          s0_readdatavalid,
-    input  [BURSTCOUNT_WIDTH-1:0]   s0_burstcount,
-    input  [DATA_WIDTH-1:0]         s0_writedata,
-    input  [HDL_ADDR_WIDTH-1:0]     s0_address, 
-    input                           s0_write,  
-    input                           s0_read,  
-    input  [BYTEEN_WIDTH-1:0]       s0_byteenable,  
-    input                           s0_debugaccess,
+    output                        s0_waitrequest,
+    output [DATA_WIDTH-1:0]       s0_readdata,
+    output                        s0_readdatavalid,
+    output [RESPONSE_WIDTH-1:0]   s0_response,
+    input  [BURSTCOUNT_WIDTH-1:0] s0_burstcount,
+    input  [DATA_WIDTH-1:0]       s0_writedata,
+    input  [HDL_ADDR_WIDTH-1:0]   s0_address, 
+    input                         s0_write, 
+    input                         s0_read, 
+    input  [BYTEEN_WIDTH-1:0]     s0_byteenable, 
+    input                         s0_debugaccess,
 
-    input                           m0_waitrequest,
-    input  [DATA_WIDTH-1:0]         m0_readdata,
-    input                           m0_readdatavalid,
-    output [BURSTCOUNT_WIDTH-1:0]   m0_burstcount,
-    output [DATA_WIDTH-1:0]         m0_writedata,
-    output [HDL_ADDR_WIDTH-1:0]     m0_address, 
-    output                          m0_write,  
-    output                          m0_read,  
-    output [BYTEEN_WIDTH-1:0]       m0_byteenable,
-    output                          m0_debugaccess
+    input                         m0_waitrequest,
+    input  [DATA_WIDTH-1:0]       m0_readdata,
+    input                         m0_readdatavalid,
+    input  [RESPONSE_WIDTH-1:0]   m0_response,
+    output [BURSTCOUNT_WIDTH-1:0] m0_burstcount,
+    output [DATA_WIDTH-1:0]       m0_writedata,
+    output [HDL_ADDR_WIDTH-1:0]   m0_address, 
+    output                        m0_write, 
+    output                        m0_read, 
+    output [BYTEEN_WIDTH-1:0]     m0_byteenable,
+    output                        m0_debugaccess
 );
     // --------------------------------------
     // Registers & signals
@@ -97,6 +100,7 @@ module altera_avalon_mm_bridge
 
     reg [DATA_WIDTH-1:0]         rsp_readdata;
     reg                          rsp_readdatavalid;
+    reg [RESPONSE_WIDTH-1:0]     rsp_response;   
 
     // --------------------------------------
     // Command pipeline
@@ -269,10 +273,12 @@ module altera_avalon_mm_bridge
             if (reset) begin
                 rsp_readdatavalid <= 1'b0;
                 rsp_readdata      <= 0;
+                rsp_response      <= 0;               
             end 
             else begin
                 rsp_readdatavalid <= m0_readdatavalid;
                 rsp_readdata      <= m0_readdata;
+                rsp_response      <= m0_response;               
             end
         end
 
@@ -282,12 +288,13 @@ module altera_avalon_mm_bridge
         always @* begin
             rsp_readdatavalid = m0_readdatavalid;
             rsp_readdata      = m0_readdata;
+            rsp_response      = m0_response;           
         end
-
     end
     endgenerate
 
     assign s0_readdatavalid = rsp_readdatavalid;
     assign s0_readdata      = rsp_readdata;
+    assign s0_response      = rsp_response;   
 
 endmodule

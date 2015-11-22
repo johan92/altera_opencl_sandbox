@@ -1,6 +1,6 @@
 Assembler report for top
-Sat Oct 17 21:37:44 2015
-Quartus II 64-Bit Version 14.1.0 Build 186 12/03/2014 SJ Full Version
+Sun Nov 22 13:20:09 2015
+Quartus Prime Version 15.1.0 Build 185 10/21/2015 SJ Standard Edition
 
 
 ---------------------
@@ -18,14 +18,14 @@ Quartus II 64-Bit Version 14.1.0 Build 186 12/03/2014 SJ Full Version
 ----------------
 ; Legal Notice ;
 ----------------
-Copyright (C) 1991-2014 Altera Corporation. All rights reserved.
+Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
 Your use of Altera Corporation's design tools, logic functions 
 and other software and tools, and its AMPP partner logic 
 functions, and any output files from any of the foregoing 
 (including device programming or simulation files), and any 
 associated documentation or information are expressly subject 
 to the terms and conditions of the Altera Program License 
-Subscription Agreement, the Altera Quartus II License Agreement,
+Subscription Agreement, the Altera Quartus Prime License Agreement,
 the Altera MegaCore Function License Agreement, or other 
 applicable license agreement, including, without limitation, 
 that your use is for the sole purpose of programming logic 
@@ -38,7 +38,7 @@ agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Sat Oct 17 21:37:44 2015 ;
+; Assembler Status      ; Successful - Sun Nov 22 13:20:09 2015 ;
 ; Revision Name         ; top                                   ;
 ; Top-level Entity Name ; top                                   ;
 ; Family                ; Cyclone V                             ;
@@ -94,8 +94,8 @@ agreement for further details.
 ; Option         ; Setting          ;
 +----------------+------------------+
 ; Device         ; 5CSEMA5F31C6     ;
-; JTAG usercode  ; 0x0246AE9C       ;
-; Checksum       ; 0x0246AE9C       ;
+; JTAG usercode  ; 0x02425149       ;
+; Checksum       ; 0x02425149       ;
 +----------------+------------------+
 
 
@@ -103,19 +103,19 @@ agreement for further details.
 ; Assembler Messages ;
 +--------------------+
 Info: *******************************************************************
-Info: Running Quartus II 64-Bit Assembler
-    Info: Version 14.1.0 Build 186 12/03/2014 SJ Full Version
-    Info: Processing started: Sat Oct 17 21:37:27 2015
+Info: Running Quartus Prime Assembler
+    Info: Version 15.1.0 Build 185 10/21/2015 SJ Standard Edition
+    Info: Processing started: Sun Nov 22 13:19:52 2015
 Info: Command: quartus_asm --read_settings_files=on --write_settings_files=off top -c top
-Info: Using INI file /home/ish/tmp/cl/vector_add/bin_vector_add/quartus.ini
+Info: Using INI file /home/ish/src/branch/ghub/altera_opencl_sandbox/trunk/vector_add/bin_vector_add/quartus.ini
 Info (115030): Assembler is generating device programming files
 Warning (11713): The configuration of the Hard Processor Subsystem (HPS) within this design has changed.
 The Preloader software that initializes the HPS requires an update.
 Using hps_isw_handoff/system_acl_iface_hps/, run the Preloader Support Package Generator to update your Preloader software
-Info: Quartus II 64-Bit Assembler was successful. 0 errors, 1 warning
-    Info: Peak virtual memory: 1034 megabytes
-    Info: Processing ended: Sat Oct 17 21:37:44 2015
-    Info: Elapsed time: 00:00:17
-    Info: Total CPU time (on all processors): 00:00:16
+Info: Quartus Prime Assembler was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 1303 megabytes
+    Info: Processing ended: Sun Nov 22 13:20:10 2015
+    Info: Elapsed time: 00:00:18
+    Info: Total CPU time (on all processors): 00:00:17
 
 

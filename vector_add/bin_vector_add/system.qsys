@@ -9,14 +9,6 @@
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
-   element $${FILENAME}
-   {
-      datum _originalDeviceFamily
-      {
-         value = "Cyclone V";
-         type = "String";
-      }
-   }
    element acl_iface
    {
       datum _sortIndex
@@ -77,6 +69,7 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
  <parameter name="maxAdditionalLatency" value="0" />
  <parameter name="projectName" value="top.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
@@ -116,6 +109,8 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="6" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_KERNEL_CRA_ADDRESS_MAP" value="" />
+  <parameter name="AUTO_KERNEL_CRA_ADDRESS_WIDTH" value="AddressWidth = -1" />
   <parameter name="AUTO_KERNEL_IRQ_INTERRUPTS_USED" value="0" />
   <parameter name="AUTO_KERNEL_PLL_REFCLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_KERNEL_PLL_REFCLK_CLOCK_RATE" value="50000000" />
@@ -137,8 +132,10 @@
   <parameter name="ADDR_W" value="4" />
   <parameter name="DATA_W" value="64" />
   <parameter name="ID_W" value="0" />
+  <parameter name="ROM_ENABLE" value="0" />
+  <parameter name="ROM_EXT_W" value="0" />
  </module>
- <module name="ext_clk_50" kind="clock_source" version="14.1" enabled="1">
+ <module name="ext_clk_50" kind="clock_source" version="15.1" enabled="1">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
@@ -151,7 +148,7 @@
    enabled="1" />
  <connection
    kind="avalon"
-   version="14.1"
+   version="15.1"
    start="vector_add_system.avm_memgmem0_port_0_0_rw"
    end="acl_iface.kernel_mem0">
   <parameter name="arbitrationPriority" value="1" />
@@ -160,7 +157,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="14.1"
+   version="15.1"
    start="avs_vector_add_cra_cra_ring.cra_master"
    end="vector_add_system.avs_vector_add_cra">
   <parameter name="arbitrationPriority" value="1" />
@@ -169,7 +166,7 @@
  </connection>
  <connection
    kind="avalon"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_cra"
    end="cra_root.cra_slave">
   <parameter name="arbitrationPriority" value="1" />
@@ -178,37 +175,37 @@
  </connection>
  <connection
    kind="clock"
-   version="14.1"
+   version="15.1"
    start="ext_clk_50.clk"
    end="acl_iface.config_clk" />
  <connection
    kind="clock"
-   version="14.1"
+   version="15.1"
    start="ext_clk_50.clk"
    end="acl_iface.kernel_pll_refclk" />
  <connection
    kind="clock"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_clk"
    end="cra_root.clock" />
  <connection
    kind="clock"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_clk"
    end="avs_vector_add_cra_cra_ring.clock" />
  <connection
    kind="clock"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_clk"
    end="vector_add_system.clock_reset" />
  <connection
    kind="clock"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_clk2x"
    end="vector_add_system.clock_reset2x" />
  <connection
    kind="conduit"
-   version="14.1"
+   version="15.1"
    start="cra_root.ring_out"
    end="avs_vector_add_cra_cra_ring.ring_in">
   <parameter name="endPort" value="" />
@@ -219,7 +216,7 @@
  </connection>
  <connection
    kind="conduit"
-   version="14.1"
+   version="15.1"
    start="avs_vector_add_cra_cra_ring.ring_out"
    end="cra_root.ring_in">
   <parameter name="endPort" value="" />
@@ -230,29 +227,29 @@
  </connection>
  <connection
    kind="interrupt"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_irq"
    end="vector_add_system.kernel_irq">
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
    kind="reset"
-   version="14.1"
+   version="15.1"
    start="ext_clk_50.clk_reset"
    end="acl_iface.global_reset" />
  <connection
    kind="reset"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_reset"
    end="vector_add_system.clock_reset_reset" />
  <connection
    kind="reset"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_reset"
    end="cra_root.reset" />
  <connection
    kind="reset"
-   version="14.1"
+   version="15.1"
    start="acl_iface.kernel_reset"
    end="avs_vector_add_cra_cra_ring.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="FIFO" />

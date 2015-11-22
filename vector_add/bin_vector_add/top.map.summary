@@ -1,10 +1,10 @@
-Analysis & Synthesis Status : Successful - Sat Oct 17 21:32:13 2015
-Quartus II 64-Bit Version : 14.1.0 Build 186 12/03/2014 SJ Full Version
+Analysis & Synthesis Status : Successful - Sun Nov 22 13:13:37 2015
+Quartus Prime Version : 15.1.0 Build 185 10/21/2015 SJ Standard Edition
 Revision Name : top
 Top-level Entity Name : top
 Family : Cyclone V
 Logic utilization (in ALMs) : N/A
-Total registers : 10295
+Total registers : 10131
 Total pins : 103
 Total virtual pins : 0
 Total block memory bits : 127,344

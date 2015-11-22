@@ -7,6 +7,7 @@ module vector_add_system
    input logic clock2x,
    input logic resetn,
    // AVS avs_vector_add_cra
+   input logic avs_vector_add_cra_enable,
    input logic avs_vector_add_cra_read,
    input logic avs_vector_add_cra_write,
    input logic [3:0] avs_vector_add_cra_address,
@@ -16,6 +17,7 @@ module vector_add_system
    output logic avs_vector_add_cra_readdatavalid,
    output logic kernel_irq,
    // AVM avm_memgmem0_port_0_0_rw
+   output logic avm_memgmem0_port_0_0_rw_enable,
    output logic avm_memgmem0_port_0_0_rw_read,
    output logic avm_memgmem0_port_0_0_rw_write,
    output logic [4:0] avm_memgmem0_port_0_0_rw_burstcount,
@@ -29,6 +31,7 @@ module vector_add_system
 );
    genvar i;
    logic kernel_irqs;
+   logic gmem0_global_avm_enable [3];
    logic gmem0_global_avm_read [3];
    logic gmem0_global_avm_write [3];
    logic [4:0] gmem0_global_avm_burstcount [3];
@@ -52,6 +55,7 @@ module vector_add_system
       .clock2x(clock2x),
       .cra_irq(kernel_irqs),
       // AVS avs_cra
+      .avs_cra_enable(avs_vector_add_cra_enable),
       .avs_cra_read(avs_vector_add_cra_read),
       .avs_cra_write(avs_vector_add_cra_write),
       .avs_cra_address(avs_vector_add_cra_address),
@@ -59,39 +63,42 @@ module vector_add_system
       .avs_cra_byteenable(avs_vector_add_cra_byteenable),
       .avs_cra_readdata(avs_vector_add_cra_readdata),
       .avs_cra_readdatavalid(avs_vector_add_cra_readdatavalid),
-      // AVM avm_local_bb1_ld__inst0
-      .avm_local_bb1_ld__inst0_read(gmem0_global_avm_read[0]),
-      .avm_local_bb1_ld__inst0_write(gmem0_global_avm_write[0]),
-      .avm_local_bb1_ld__inst0_burstcount(gmem0_global_avm_burstcount[0]),
-      .avm_local_bb1_ld__inst0_address(gmem0_global_avm_address[0]),
-      .avm_local_bb1_ld__inst0_writedata(gmem0_global_avm_writedata[0]),
-      .avm_local_bb1_ld__inst0_byteenable(gmem0_global_avm_byteenable[0]),
-      .avm_local_bb1_ld__inst0_waitrequest(gmem0_global_avm_waitrequest[0]),
-      .avm_local_bb1_ld__inst0_readdata(gmem0_global_avm_readdata[0]),
-      .avm_local_bb1_ld__inst0_readdatavalid(gmem0_global_avm_readdatavalid[0]),
-      .avm_local_bb1_ld__inst0_writeack(gmem0_global_avm_writeack[0]),
-      // AVM avm_local_bb1_ld__u0_inst0
-      .avm_local_bb1_ld__u0_inst0_read(gmem0_global_avm_read[1]),
-      .avm_local_bb1_ld__u0_inst0_write(gmem0_global_avm_write[1]),
-      .avm_local_bb1_ld__u0_inst0_burstcount(gmem0_global_avm_burstcount[1]),
-      .avm_local_bb1_ld__u0_inst0_address(gmem0_global_avm_address[1]),
-      .avm_local_bb1_ld__u0_inst0_writedata(gmem0_global_avm_writedata[1]),
-      .avm_local_bb1_ld__u0_inst0_byteenable(gmem0_global_avm_byteenable[1]),
-      .avm_local_bb1_ld__u0_inst0_waitrequest(gmem0_global_avm_waitrequest[1]),
-      .avm_local_bb1_ld__u0_inst0_readdata(gmem0_global_avm_readdata[1]),
-      .avm_local_bb1_ld__u0_inst0_readdatavalid(gmem0_global_avm_readdatavalid[1]),
-      .avm_local_bb1_ld__u0_inst0_writeack(gmem0_global_avm_writeack[1]),
-      // AVM avm_local_bb1_st_add_inst0
-      .avm_local_bb1_st_add_inst0_read(gmem0_global_avm_read[2]),
-      .avm_local_bb1_st_add_inst0_write(gmem0_global_avm_write[2]),
-      .avm_local_bb1_st_add_inst0_burstcount(gmem0_global_avm_burstcount[2]),
-      .avm_local_bb1_st_add_inst0_address(gmem0_global_avm_address[2]),
-      .avm_local_bb1_st_add_inst0_writedata(gmem0_global_avm_writedata[2]),
-      .avm_local_bb1_st_add_inst0_byteenable(gmem0_global_avm_byteenable[2]),
-      .avm_local_bb1_st_add_inst0_waitrequest(gmem0_global_avm_waitrequest[2]),
-      .avm_local_bb1_st_add_inst0_readdata(gmem0_global_avm_readdata[2]),
-      .avm_local_bb1_st_add_inst0_readdatavalid(gmem0_global_avm_readdatavalid[2]),
-      .avm_local_bb1_st_add_inst0_writeack(gmem0_global_avm_writeack[2]),
+      // AVM avm_local_bb0_ld__inst0
+      .avm_local_bb0_ld__inst0_enable(gmem0_global_avm_enable[0]),
+      .avm_local_bb0_ld__inst0_read(gmem0_global_avm_read[0]),
+      .avm_local_bb0_ld__inst0_write(gmem0_global_avm_write[0]),
+      .avm_local_bb0_ld__inst0_burstcount(gmem0_global_avm_burstcount[0]),
+      .avm_local_bb0_ld__inst0_address(gmem0_global_avm_address[0]),
+      .avm_local_bb0_ld__inst0_writedata(gmem0_global_avm_writedata[0]),
+      .avm_local_bb0_ld__inst0_byteenable(gmem0_global_avm_byteenable[0]),
+      .avm_local_bb0_ld__inst0_waitrequest(gmem0_global_avm_waitrequest[0]),
+      .avm_local_bb0_ld__inst0_readdata(gmem0_global_avm_readdata[0]),
+      .avm_local_bb0_ld__inst0_readdatavalid(gmem0_global_avm_readdatavalid[0]),
+      .avm_local_bb0_ld__inst0_writeack(gmem0_global_avm_writeack[0]),
+      // AVM avm_local_bb0_ld__u0_inst0
+      .avm_local_bb0_ld__u0_inst0_enable(gmem0_global_avm_enable[1]),
+      .avm_local_bb0_ld__u0_inst0_read(gmem0_global_avm_read[1]),
+      .avm_local_bb0_ld__u0_inst0_write(gmem0_global_avm_write[1]),
+      .avm_local_bb0_ld__u0_inst0_burstcount(gmem0_global_avm_burstcount[1]),
+      .avm_local_bb0_ld__u0_inst0_address(gmem0_global_avm_address[1]),
+      .avm_local_bb0_ld__u0_inst0_writedata(gmem0_global_avm_writedata[1]),
+      .avm_local_bb0_ld__u0_inst0_byteenable(gmem0_global_avm_byteenable[1]),
+      .avm_local_bb0_ld__u0_inst0_waitrequest(gmem0_global_avm_waitrequest[1]),
+      .avm_local_bb0_ld__u0_inst0_readdata(gmem0_global_avm_readdata[1]),
+      .avm_local_bb0_ld__u0_inst0_readdatavalid(gmem0_global_avm_readdatavalid[1]),
+      .avm_local_bb0_ld__u0_inst0_writeack(gmem0_global_avm_writeack[1]),
+      // AVM avm_local_bb0_st_add_inst0
+      .avm_local_bb0_st_add_inst0_enable(gmem0_global_avm_enable[2]),
+      .avm_local_bb0_st_add_inst0_read(gmem0_global_avm_read[2]),
+      .avm_local_bb0_st_add_inst0_write(gmem0_global_avm_write[2]),
+      .avm_local_bb0_st_add_inst0_burstcount(gmem0_global_avm_burstcount[2]),
+      .avm_local_bb0_st_add_inst0_address(gmem0_global_avm_address[2]),
+      .avm_local_bb0_st_add_inst0_writedata(gmem0_global_avm_writedata[2]),
+      .avm_local_bb0_st_add_inst0_byteenable(gmem0_global_avm_byteenable[2]),
+      .avm_local_bb0_st_add_inst0_waitrequest(gmem0_global_avm_waitrequest[2]),
+      .avm_local_bb0_st_add_inst0_readdata(gmem0_global_avm_readdata[2]),
+      .avm_local_bb0_st_add_inst0_readdatavalid(gmem0_global_avm_readdatavalid[2]),
+      .avm_local_bb0_st_add_inst0_writeack(gmem0_global_avm_writeack[2]),
       .profile_extmem_vector_add_function_bank0_port0_wrap_read_data_inc_en(profile_extmem_vector_add_function_bank0_port0_top_read_data_inc_en),
       .profile_extmem_vector_add_function_bank0_port0_wrap_write_data_inc_en(profile_extmem_vector_add_function_bank0_port0_top_write_data_inc_en),
       .profile_extmem_vector_add_function_bank0_port0_wrap_read_burst_count_en(profile_extmem_vector_add_function_bank0_port0_top_read_burst_count_en),
@@ -102,6 +109,7 @@ module vector_add_system
    generate
    begin:gmem0_
       logic gmem0_icm_in_arb_request [3];
+      logic gmem0_icm_in_arb_enable [3];
       logic gmem0_icm_in_arb_read [3];
       logic gmem0_icm_in_arb_write [3];
       logic [4:0] gmem0_icm_in_arb_burstcount [3];
@@ -113,6 +121,7 @@ module vector_add_system
       logic gmem0_icm_in_rrp_datavalid [3];
       logic [255:0] gmem0_icm_in_rrp_data [3];
       logic gmem0_icm_preroute_arb_request [3];
+      logic gmem0_icm_preroute_arb_enable [3];
       logic gmem0_icm_preroute_arb_read [3];
       logic gmem0_icm_preroute_arb_write [3];
       logic [4:0] gmem0_icm_preroute_arb_burstcount [3];
@@ -124,6 +133,7 @@ module vector_add_system
       logic gmem0_icm_preroute_rrp_datavalid [3];
       logic [255:0] gmem0_icm_preroute_rrp_data [3];
       logic icm_groupgmem0_router_0_arb_request [1];
+      logic icm_groupgmem0_router_0_arb_enable [1];
       logic icm_groupgmem0_router_0_arb_read [1];
       logic icm_groupgmem0_router_0_arb_write [1];
       logic [4:0] icm_groupgmem0_router_0_arb_burstcount [1];
@@ -135,6 +145,7 @@ module vector_add_system
       logic icm_groupgmem0_router_0_rrp_datavalid [1];
       logic [255:0] icm_groupgmem0_router_0_rrp_data [1];
       logic icm_groupgmem0_router_1_arb_request [1];
+      logic icm_groupgmem0_router_1_arb_enable [1];
       logic icm_groupgmem0_router_1_arb_read [1];
       logic icm_groupgmem0_router_1_arb_write [1];
       logic [4:0] icm_groupgmem0_router_1_arb_burstcount [1];
@@ -146,6 +157,7 @@ module vector_add_system
       logic icm_groupgmem0_router_1_rrp_datavalid [1];
       logic [255:0] icm_groupgmem0_router_1_rrp_data [1];
       logic icm_groupgmem0_router_2_arb_request [1];
+      logic icm_groupgmem0_router_2_arb_enable [1];
       logic icm_groupgmem0_router_2_arb_read [1];
       logic icm_groupgmem0_router_2_arb_write [1];
       logic [4:0] icm_groupgmem0_router_2_arb_burstcount [1];
@@ -157,6 +169,7 @@ module vector_add_system
       logic icm_groupgmem0_router_2_rrp_datavalid [1];
       logic [255:0] icm_groupgmem0_router_2_rrp_data [1];
       logic icm_out_0_rw_arb_request [1];
+      logic icm_out_0_rw_arb_enable [1];
       logic icm_out_0_rw_arb_read [1];
       logic icm_out_0_rw_arb_write [1];
       logic [4:0] icm_out_0_rw_arb_burstcount [1];
@@ -169,6 +182,7 @@ module vector_add_system
       logic icm_out_0_rw_rrp_datavalid [1];
       logic [255:0] icm_out_0_rw_rrp_data [1];
       logic icm_routedgmem0_port_0_0_rw_arb_request [3];
+      logic icm_routedgmem0_port_0_0_rw_arb_enable [3];
       logic icm_routedgmem0_port_0_0_rw_arb_read [3];
       logic icm_routedgmem0_port_0_0_rw_arb_write [3];
       logic [4:0] icm_routedgmem0_port_0_0_rw_arb_burstcount [3];
@@ -194,6 +208,7 @@ module vector_add_system
          gmem0_avm_to_ic
          (
             // AVM avm
+            .avm_enable(gmem0_global_avm_enable[i]),
             .avm_read(gmem0_global_avm_read[i]),
             .avm_write(gmem0_global_avm_write[i]),
             .avm_burstcount(gmem0_global_avm_burstcount[i]),
@@ -206,6 +221,7 @@ module vector_add_system
             .avm_writeack(gmem0_global_avm_writeack[i]),
             // ICM ic
             .ic_arb_request(gmem0_icm_in_arb_request[i]),
+            .ic_arb_enable(gmem0_icm_in_arb_enable[i]),
             .ic_arb_read(gmem0_icm_in_arb_read[i]),
             .ic_arb_write(gmem0_icm_in_arb_write[i]),
             .ic_arb_burstcount(gmem0_icm_in_arb_burstcount[i]),
@@ -221,6 +237,7 @@ module vector_add_system
       end
 
       assign icm_groupgmem0_router_0_arb_request[0] = gmem0_icm_in_arb_request[2];
+      assign icm_groupgmem0_router_0_arb_enable[0] = gmem0_icm_in_arb_enable[2];
       assign icm_groupgmem0_router_0_arb_read[0] = gmem0_icm_in_arb_read[2];
       assign icm_groupgmem0_router_0_arb_write[0] = gmem0_icm_in_arb_write[2];
       assign icm_groupgmem0_router_0_arb_burstcount[0] = gmem0_icm_in_arb_burstcount[2];
@@ -231,13 +248,14 @@ module vector_add_system
       assign gmem0_icm_in_wrp_ack[2] = icm_groupgmem0_router_0_wrp_ack[0];
       assign gmem0_icm_in_rrp_datavalid[2] = icm_groupgmem0_router_0_rrp_datavalid[0];
       assign gmem0_icm_in_rrp_data[2] = icm_groupgmem0_router_0_rrp_data[0];
-      // INST global_ic_preroutegmem0_router_0 of interconnect_0
-      interconnect_0 global_ic_preroutegmem0_router_0
+      // INST global_ic_preroutegmem0_router_0 of vector_add_system_interconnect_0
+      vector_add_system_interconnect_0 global_ic_preroutegmem0_router_0
       (
          .clock(clock),
          .resetn(resetn),
          // ICM m
          .m_arb_request(icm_groupgmem0_router_0_arb_request),
+         .m_arb_enable(icm_groupgmem0_router_0_arb_enable),
          .m_arb_read(icm_groupgmem0_router_0_arb_read),
          .m_arb_write(icm_groupgmem0_router_0_arb_write),
          .m_arb_burstcount(icm_groupgmem0_router_0_arb_burstcount),
@@ -250,6 +268,7 @@ module vector_add_system
          .m_rrp_data(icm_groupgmem0_router_0_rrp_data),
          // ICM mout
          .mout_arb_request(gmem0_icm_preroute_arb_request[0]),
+         .mout_arb_enable(gmem0_icm_preroute_arb_enable[0]),
          .mout_arb_read(gmem0_icm_preroute_arb_read[0]),
          .mout_arb_write(gmem0_icm_preroute_arb_write[0]),
          .mout_arb_burstcount(gmem0_icm_preroute_arb_burstcount[0]),
@@ -264,6 +283,7 @@ module vector_add_system
       );
 
       assign icm_groupgmem0_router_1_arb_request[0] = gmem0_icm_in_arb_request[1];
+      assign icm_groupgmem0_router_1_arb_enable[0] = gmem0_icm_in_arb_enable[1];
       assign icm_groupgmem0_router_1_arb_read[0] = gmem0_icm_in_arb_read[1];
       assign icm_groupgmem0_router_1_arb_write[0] = gmem0_icm_in_arb_write[1];
       assign icm_groupgmem0_router_1_arb_burstcount[0] = gmem0_icm_in_arb_burstcount[1];
@@ -274,13 +294,14 @@ module vector_add_system
       assign gmem0_icm_in_wrp_ack[1] = icm_groupgmem0_router_1_wrp_ack[0];
       assign gmem0_icm_in_rrp_datavalid[1] = icm_groupgmem0_router_1_rrp_datavalid[0];
       assign gmem0_icm_in_rrp_data[1] = icm_groupgmem0_router_1_rrp_data[0];
-      // INST global_ic_preroutegmem0_router_1 of interconnect_1
-      interconnect_1 global_ic_preroutegmem0_router_1
+      // INST global_ic_preroutegmem0_router_1 of vector_add_system_interconnect_1
+      vector_add_system_interconnect_1 global_ic_preroutegmem0_router_1
       (
          .clock(clock),
          .resetn(resetn),
          // ICM m
          .m_arb_request(icm_groupgmem0_router_1_arb_request),
+         .m_arb_enable(icm_groupgmem0_router_1_arb_enable),
          .m_arb_read(icm_groupgmem0_router_1_arb_read),
          .m_arb_write(icm_groupgmem0_router_1_arb_write),
          .m_arb_burstcount(icm_groupgmem0_router_1_arb_burstcount),
@@ -293,6 +314,7 @@ module vector_add_system
          .m_rrp_data(icm_groupgmem0_router_1_rrp_data),
          // ICM mout
          .mout_arb_request(gmem0_icm_preroute_arb_request[1]),
+         .mout_arb_enable(gmem0_icm_preroute_arb_enable[1]),
          .mout_arb_read(gmem0_icm_preroute_arb_read[1]),
          .mout_arb_write(gmem0_icm_preroute_arb_write[1]),
          .mout_arb_burstcount(gmem0_icm_preroute_arb_burstcount[1]),
@@ -307,6 +329,7 @@ module vector_add_system
       );
 
       assign icm_groupgmem0_router_2_arb_request[0] = gmem0_icm_in_arb_request[0];
+      assign icm_groupgmem0_router_2_arb_enable[0] = gmem0_icm_in_arb_enable[0];
       assign icm_groupgmem0_router_2_arb_read[0] = gmem0_icm_in_arb_read[0];
       assign icm_groupgmem0_router_2_arb_write[0] = gmem0_icm_in_arb_write[0];
       assign icm_groupgmem0_router_2_arb_burstcount[0] = gmem0_icm_in_arb_burstcount[0];
@@ -317,13 +340,14 @@ module vector_add_system
       assign gmem0_icm_in_wrp_ack[0] = icm_groupgmem0_router_2_wrp_ack[0];
       assign gmem0_icm_in_rrp_datavalid[0] = icm_groupgmem0_router_2_rrp_datavalid[0];
       assign gmem0_icm_in_rrp_data[0] = icm_groupgmem0_router_2_rrp_data[0];
-      // INST global_ic_preroutegmem0_router_2 of interconnect_1
-      interconnect_1 global_ic_preroutegmem0_router_2
+      // INST global_ic_preroutegmem0_router_2 of vector_add_system_interconnect_1
+      vector_add_system_interconnect_1 global_ic_preroutegmem0_router_2
       (
          .clock(clock),
          .resetn(resetn),
          // ICM m
          .m_arb_request(icm_groupgmem0_router_2_arb_request),
+         .m_arb_enable(icm_groupgmem0_router_2_arb_enable),
          .m_arb_read(icm_groupgmem0_router_2_arb_read),
          .m_arb_write(icm_groupgmem0_router_2_arb_write),
          .m_arb_burstcount(icm_groupgmem0_router_2_arb_burstcount),
@@ -336,6 +360,7 @@ module vector_add_system
          .m_rrp_data(icm_groupgmem0_router_2_rrp_data),
          // ICM mout
          .mout_arb_request(gmem0_icm_preroute_arb_request[2]),
+         .mout_arb_enable(gmem0_icm_preroute_arb_enable[2]),
          .mout_arb_read(gmem0_icm_preroute_arb_read[2]),
          .mout_arb_write(gmem0_icm_preroute_arb_write[2]),
          .mout_arb_burstcount(gmem0_icm_preroute_arb_burstcount[2]),
@@ -352,6 +377,7 @@ module vector_add_system
       for( i = 0; i < 3; i = i + 1 )
       begin:router
          logic b_arb_request [1];
+         logic b_arb_enable [1];
          logic b_arb_read [1];
          logic b_arb_write [1];
          logic [4:0] b_arb_burstcount [1];
@@ -380,6 +406,7 @@ module vector_add_system
             .bank_select(bank_select),
             // ICM m
             .m_arb_request(gmem0_icm_preroute_arb_request[i]),
+            .m_arb_enable(gmem0_icm_preroute_arb_enable[i]),
             .m_arb_read(gmem0_icm_preroute_arb_read[i]),
             .m_arb_write(gmem0_icm_preroute_arb_write[i]),
             .m_arb_burstcount(gmem0_icm_preroute_arb_burstcount[i]),
@@ -392,6 +419,7 @@ module vector_add_system
             .m_rrp_data(gmem0_icm_preroute_rrp_data[i]),
             // ICM b
             .b_arb_request(b_arb_request),
+            .b_arb_enable(b_arb_enable),
             .b_arb_read(b_arb_read),
             .b_arb_write(b_arb_write),
             .b_arb_burstcount(b_arb_burstcount),
@@ -407,13 +435,14 @@ module vector_add_system
          assign bank_select = 1'b1;
       end
 
-      // INST global_icgmem0_port_0_0_rw of interconnect_2
-      interconnect_2 global_icgmem0_port_0_0_rw
+      // INST global_icgmem0_port_0_0_rw of vector_add_system_interconnect_2
+      vector_add_system_interconnect_2 global_icgmem0_port_0_0_rw
       (
          .clock(clock),
          .resetn(resetn),
          // ICM m
          .m_arb_request(icm_routedgmem0_port_0_0_rw_arb_request),
+         .m_arb_enable(icm_routedgmem0_port_0_0_rw_arb_enable),
          .m_arb_read(icm_routedgmem0_port_0_0_rw_arb_read),
          .m_arb_write(icm_routedgmem0_port_0_0_rw_arb_write),
          .m_arb_burstcount(icm_routedgmem0_port_0_0_rw_arb_burstcount),
@@ -426,6 +455,7 @@ module vector_add_system
          .m_rrp_data(icm_routedgmem0_port_0_0_rw_rrp_data),
          // ICM mout
          .mout_arb_request(icm_out_0_rw_arb_request[0]),
+         .mout_arb_enable(icm_out_0_rw_arb_enable[0]),
          .mout_arb_read(icm_out_0_rw_arb_read[0]),
          .mout_arb_write(icm_out_0_rw_arb_write[0]),
          .mout_arb_burstcount(icm_out_0_rw_arb_burstcount[0]),
@@ -442,6 +472,7 @@ module vector_add_system
       for( i = 0; i < 3; i = i + 1 )
       begin:mgmem0_port_0_0_rw
          assign icm_routedgmem0_port_0_0_rw_arb_request[i] = router[i].b_arb_request[0];
+         assign icm_routedgmem0_port_0_0_rw_arb_enable[i] = router[i].b_arb_enable[0];
          assign icm_routedgmem0_port_0_0_rw_arb_read[i] = router[i].b_arb_read[0];
          assign icm_routedgmem0_port_0_0_rw_arb_write[i] = router[i].b_arb_write[0];
          assign icm_routedgmem0_port_0_0_rw_arb_burstcount[i] = router[i].b_arb_burstcount[0];
@@ -467,6 +498,7 @@ module vector_add_system
       (
          // ICM ic
          .ic_arb_request(icm_out_0_rw_arb_request[0]),
+         .ic_arb_enable(icm_out_0_rw_arb_enable[0]),
          .ic_arb_read(icm_out_0_rw_arb_read[0]),
          .ic_arb_write(icm_out_0_rw_arb_write[0]),
          .ic_arb_burstcount(icm_out_0_rw_arb_burstcount[0]),
@@ -479,6 +511,7 @@ module vector_add_system
          .ic_rrp_datavalid(icm_out_0_rw_rrp_datavalid[0]),
          .ic_rrp_data(icm_out_0_rw_rrp_data[0]),
          // AVM avm
+         .avm_enable(avm_memgmem0_port_0_0_rw_enable),
          .avm_read(avm_memgmem0_port_0_0_rw_read),
          .avm_write(avm_memgmem0_port_0_0_rw_write),
          .avm_burstcount(avm_memgmem0_port_0_0_rw_burstcount),
@@ -530,6 +563,7 @@ module vector_add_top_wrapper
    input logic clock2x,
    output logic cra_irq,
    // AVS avs_cra
+   input logic avs_cra_enable,
    input logic avs_cra_read,
    input logic avs_cra_write,
    input logic [3:0] avs_cra_address,
@@ -537,39 +571,42 @@ module vector_add_top_wrapper
    input logic [7:0] avs_cra_byteenable,
    output logic [63:0] avs_cra_readdata,
    output logic avs_cra_readdatavalid,
-   // AVM avm_local_bb1_ld__inst0
-   output logic avm_local_bb1_ld__inst0_read,
-   output logic avm_local_bb1_ld__inst0_write,
-   output logic [4:0] avm_local_bb1_ld__inst0_burstcount,
-   output logic [29:0] avm_local_bb1_ld__inst0_address,
-   output logic [255:0] avm_local_bb1_ld__inst0_writedata,
-   output logic [31:0] avm_local_bb1_ld__inst0_byteenable,
-   input logic avm_local_bb1_ld__inst0_waitrequest,
-   input logic [255:0] avm_local_bb1_ld__inst0_readdata,
-   input logic avm_local_bb1_ld__inst0_readdatavalid,
-   input logic avm_local_bb1_ld__inst0_writeack,
-   // AVM avm_local_bb1_ld__u0_inst0
-   output logic avm_local_bb1_ld__u0_inst0_read,
-   output logic avm_local_bb1_ld__u0_inst0_write,
-   output logic [4:0] avm_local_bb1_ld__u0_inst0_burstcount,
-   output logic [29:0] avm_local_bb1_ld__u0_inst0_address,
-   output logic [255:0] avm_local_bb1_ld__u0_inst0_writedata,
-   output logic [31:0] avm_local_bb1_ld__u0_inst0_byteenable,
-   input logic avm_local_bb1_ld__u0_inst0_waitrequest,
-   input logic [255:0] avm_local_bb1_ld__u0_inst0_readdata,
-   input logic avm_local_bb1_ld__u0_inst0_readdatavalid,
-   input logic avm_local_bb1_ld__u0_inst0_writeack,
-   // AVM avm_local_bb1_st_add_inst0
-   output logic avm_local_bb1_st_add_inst0_read,
-   output logic avm_local_bb1_st_add_inst0_write,
-   output logic [4:0] avm_local_bb1_st_add_inst0_burstcount,
-   output logic [29:0] avm_local_bb1_st_add_inst0_address,
-   output logic [255:0] avm_local_bb1_st_add_inst0_writedata,
-   output logic [31:0] avm_local_bb1_st_add_inst0_byteenable,
-   input logic avm_local_bb1_st_add_inst0_waitrequest,
-   input logic [255:0] avm_local_bb1_st_add_inst0_readdata,
-   input logic avm_local_bb1_st_add_inst0_readdatavalid,
-   input logic avm_local_bb1_st_add_inst0_writeack,
+   // AVM avm_local_bb0_ld__inst0
+   output logic avm_local_bb0_ld__inst0_enable,
+   output logic avm_local_bb0_ld__inst0_read,
+   output logic avm_local_bb0_ld__inst0_write,
+   output logic [4:0] avm_local_bb0_ld__inst0_burstcount,
+   output logic [29:0] avm_local_bb0_ld__inst0_address,
+   output logic [255:0] avm_local_bb0_ld__inst0_writedata,
+   output logic [31:0] avm_local_bb0_ld__inst0_byteenable,
+   input logic avm_local_bb0_ld__inst0_waitrequest,
+   input logic [255:0] avm_local_bb0_ld__inst0_readdata,
+   input logic avm_local_bb0_ld__inst0_readdatavalid,
+   input logic avm_local_bb0_ld__inst0_writeack,
+   // AVM avm_local_bb0_ld__u0_inst0
+   output logic avm_local_bb0_ld__u0_inst0_enable,
+   output logic avm_local_bb0_ld__u0_inst0_read,
+   output logic avm_local_bb0_ld__u0_inst0_write,
+   output logic [4:0] avm_local_bb0_ld__u0_inst0_burstcount,
+   output logic [29:0] avm_local_bb0_ld__u0_inst0_address,
+   output logic [255:0] avm_local_bb0_ld__u0_inst0_writedata,
+   output logic [31:0] avm_local_bb0_ld__u0_inst0_byteenable,
+   input logic avm_local_bb0_ld__u0_inst0_waitrequest,
+   input logic [255:0] avm_local_bb0_ld__u0_inst0_readdata,
+   input logic avm_local_bb0_ld__u0_inst0_readdatavalid,
+   input logic avm_local_bb0_ld__u0_inst0_writeack,
+   // AVM avm_local_bb0_st_add_inst0
+   output logic avm_local_bb0_st_add_inst0_enable,
+   output logic avm_local_bb0_st_add_inst0_read,
+   output logic avm_local_bb0_st_add_inst0_write,
+   output logic [4:0] avm_local_bb0_st_add_inst0_burstcount,
+   output logic [29:0] avm_local_bb0_st_add_inst0_address,
+   output logic [255:0] avm_local_bb0_st_add_inst0_writedata,
+   output logic [31:0] avm_local_bb0_st_add_inst0_byteenable,
+   input logic avm_local_bb0_st_add_inst0_waitrequest,
+   input logic [255:0] avm_local_bb0_st_add_inst0_readdata,
+   input logic avm_local_bb0_st_add_inst0_readdatavalid,
+   input logic avm_local_bb0_st_add_inst0_writeack,
    input logic profile_extmem_vector_add_function_bank0_port0_wrap_read_data_inc_en,
    input logic profile_extmem_vector_add_function_bank0_port0_wrap_write_data_inc_en,
    input logic profile_extmem_vector_add_function_bank0_port0_wrap_read_burst_count_en,
@@ -594,6 +631,7 @@ module vector_add_top_wrapper
       .clock2x(clock2x),
       .cra_irq(cra_irq),
       // AVS avs_cra
+      .avs_cra_enable(avs_cra_enable),
       .avs_cra_read(avs_cra_read),
       .avs_cra_write(avs_cra_write),
       .avs_cra_address(avs_cra_address),
@@ -601,39 +639,42 @@ module vector_add_top_wrapper
       .avs_cra_byteenable(avs_cra_byteenable),
       .avs_cra_readdata(avs_cra_readdata),
       .avs_cra_readdatavalid(avs_cra_readdatavalid),
-      // AVM avm_local_bb1_ld__inst0
-      .avm_local_bb1_ld__inst0_read(avm_local_bb1_ld__inst0_read),
-      .avm_local_bb1_ld__inst0_write(avm_local_bb1_ld__inst0_write),
-      .avm_local_bb1_ld__inst0_burstcount(avm_local_bb1_ld__inst0_burstcount),
-      .avm_local_bb1_ld__inst0_address(avm_local_bb1_ld__inst0_address),
-      .avm_local_bb1_ld__inst0_writedata(avm_local_bb1_ld__inst0_writedata),
-      .avm_local_bb1_ld__inst0_byteenable(avm_local_bb1_ld__inst0_byteenable),
-      .avm_local_bb1_ld__inst0_waitrequest(avm_local_bb1_ld__inst0_waitrequest),
-      .avm_local_bb1_ld__inst0_readdata(avm_local_bb1_ld__inst0_readdata),
-      .avm_local_bb1_ld__inst0_readdatavalid(avm_local_bb1_ld__inst0_readdatavalid),
-      .avm_local_bb1_ld__inst0_writeack(avm_local_bb1_ld__inst0_writeack),
-      // AVM avm_local_bb1_ld__u0_inst0
-      .avm_local_bb1_ld__u0_inst0_read(avm_local_bb1_ld__u0_inst0_read),
-      .avm_local_bb1_ld__u0_inst0_write(avm_local_bb1_ld__u0_inst0_write),
-      .avm_local_bb1_ld__u0_inst0_burstcount(avm_local_bb1_ld__u0_inst0_burstcount),
-      .avm_local_bb1_ld__u0_inst0_address(avm_local_bb1_ld__u0_inst0_address),
-      .avm_local_bb1_ld__u0_inst0_writedata(avm_local_bb1_ld__u0_inst0_writedata),
-      .avm_local_bb1_ld__u0_inst0_byteenable(avm_local_bb1_ld__u0_inst0_byteenable),
-      .avm_local_bb1_ld__u0_inst0_waitrequest(avm_local_bb1_ld__u0_inst0_waitrequest),
-      .avm_local_bb1_ld__u0_inst0_readdata(avm_local_bb1_ld__u0_inst0_readdata),
-      .avm_local_bb1_ld__u0_inst0_readdatavalid(avm_local_bb1_ld__u0_inst0_readdatavalid),
-      .avm_local_bb1_ld__u0_inst0_writeack(avm_local_bb1_ld__u0_inst0_writeack),
-      // AVM avm_local_bb1_st_add_inst0
-      .avm_local_bb1_st_add_inst0_read(avm_local_bb1_st_add_inst0_read),
-      .avm_local_bb1_st_add_inst0_write(avm_local_bb1_st_add_inst0_write),
-      .avm_local_bb1_st_add_inst0_burstcount(avm_local_bb1_st_add_inst0_burstcount),
-      .avm_local_bb1_st_add_inst0_address(avm_local_bb1_st_add_inst0_address),
-      .avm_local_bb1_st_add_inst0_writedata(avm_local_bb1_st_add_inst0_writedata),
-      .avm_local_bb1_st_add_inst0_byteenable(avm_local_bb1_st_add_inst0_byteenable),
-      .avm_local_bb1_st_add_inst0_waitrequest(avm_local_bb1_st_add_inst0_waitrequest),
-      .avm_local_bb1_st_add_inst0_readdata(avm_local_bb1_st_add_inst0_readdata),
-      .avm_local_bb1_st_add_inst0_readdatavalid(avm_local_bb1_st_add_inst0_readdatavalid),
-      .avm_local_bb1_st_add_inst0_writeack(avm_local_bb1_st_add_inst0_writeack),
+      // AVM avm_local_bb0_ld__inst0
+      .avm_local_bb0_ld__inst0_enable(avm_local_bb0_ld__inst0_enable),
+      .avm_local_bb0_ld__inst0_read(avm_local_bb0_ld__inst0_read),
+      .avm_local_bb0_ld__inst0_write(avm_local_bb0_ld__inst0_write),
+      .avm_local_bb0_ld__inst0_burstcount(avm_local_bb0_ld__inst0_burstcount),
+      .avm_local_bb0_ld__inst0_address(avm_local_bb0_ld__inst0_address),
+      .avm_local_bb0_ld__inst0_writedata(avm_local_bb0_ld__inst0_writedata),
+      .avm_local_bb0_ld__inst0_byteenable(avm_local_bb0_ld__inst0_byteenable),
+      .avm_local_bb0_ld__inst0_waitrequest(avm_local_bb0_ld__inst0_waitrequest),
+      .avm_local_bb0_ld__inst0_readdata(avm_local_bb0_ld__inst0_readdata),
+      .avm_local_bb0_ld__inst0_readdatavalid(avm_local_bb0_ld__inst0_readdatavalid),
+      .avm_local_bb0_ld__inst0_writeack(avm_local_bb0_ld__inst0_writeack),
+      // AVM avm_local_bb0_ld__u0_inst0
+      .avm_local_bb0_ld__u0_inst0_enable(avm_local_bb0_ld__u0_inst0_enable),
+      .avm_local_bb0_ld__u0_inst0_read(avm_local_bb0_ld__u0_inst0_read),
+      .avm_local_bb0_ld__u0_inst0_write(avm_local_bb0_ld__u0_inst0_write),
+      .avm_local_bb0_ld__u0_inst0_burstcount(avm_local_bb0_ld__u0_inst0_burstcount),
+      .avm_local_bb0_ld__u0_inst0_address(avm_local_bb0_ld__u0_inst0_address),
+      .avm_local_bb0_ld__u0_inst0_writedata(avm_local_bb0_ld__u0_inst0_writedata),
+      .avm_local_bb0_ld__u0_inst0_byteenable(avm_local_bb0_ld__u0_inst0_byteenable),
+      .avm_local_bb0_ld__u0_inst0_waitrequest(avm_local_bb0_ld__u0_inst0_waitrequest),
+      .avm_local_bb0_ld__u0_inst0_readdata(avm_local_bb0_ld__u0_inst0_readdata),
+      .avm_local_bb0_ld__u0_inst0_readdatavalid(avm_local_bb0_ld__u0_inst0_readdatavalid),
+      .avm_local_bb0_ld__u0_inst0_writeack(avm_local_bb0_ld__u0_inst0_writeack),
+      // AVM avm_local_bb0_st_add_inst0
+      .avm_local_bb0_st_add_inst0_enable(avm_local_bb0_st_add_inst0_enable),
+      .avm_local_bb0_st_add_inst0_read(avm_local_bb0_st_add_inst0_read),
+      .avm_local_bb0_st_add_inst0_write(avm_local_bb0_st_add_inst0_write),
+      .avm_local_bb0_st_add_inst0_burstcount(avm_local_bb0_st_add_inst0_burstcount),
+      .avm_local_bb0_st_add_inst0_address(avm_local_bb0_st_add_inst0_address),
+      .avm_local_bb0_st_add_inst0_writedata(avm_local_bb0_st_add_inst0_writedata),
+      .avm_local_bb0_st_add_inst0_byteenable(avm_local_bb0_st_add_inst0_byteenable),
+      .avm_local_bb0_st_add_inst0_waitrequest(avm_local_bb0_st_add_inst0_waitrequest),
+      .avm_local_bb0_st_add_inst0_readdata(avm_local_bb0_st_add_inst0_readdata),
+      .avm_local_bb0_st_add_inst0_readdatavalid(avm_local_bb0_st_add_inst0_readdatavalid),
+      .avm_local_bb0_st_add_inst0_writeack(avm_local_bb0_st_add_inst0_writeack),
       .profile_extmem_vector_add_function_bank0_port0_read_data_inc_en(profile_extmem_vector_add_function_bank0_port0_kern_side_read_data_inc_en),
       .profile_extmem_vector_add_function_bank0_port0_write_data_inc_en(profile_extmem_vector_add_function_bank0_port0_kern_side_write_data_inc_en),
       .profile_extmem_vector_add_function_bank0_port0_read_burst_count_en(profile_extmem_vector_add_function_bank0_port0_kern_side_read_burst_count_en),
@@ -652,14 +693,15 @@ module vector_add_top_wrapper
 endmodule
 
 /////////////////////////////////////////////////////////////////
-// MODULE interconnect_0
+// MODULE vector_add_system_interconnect_0
 /////////////////////////////////////////////////////////////////
-module interconnect_0
+module vector_add_system_interconnect_0
 (
    input logic clock,
    input logic resetn,
    // ICM m
    input logic m_arb_request [1],
+   input logic m_arb_enable [1],
    input logic m_arb_read [1],
    input logic m_arb_write [1],
    input logic [4:0] m_arb_burstcount [1],
@@ -672,6 +714,7 @@ module interconnect_0
    output logic [255:0] m_rrp_data [1],
    // ICM mout
    output logic mout_arb_request,
+   output logic mout_arb_enable,
    output logic mout_arb_read,
    output logic mout_arb_write,
    output logic [4:0] mout_arb_burstcount,
@@ -738,6 +781,7 @@ module interconnect_0
          );
 
          assign m_intf.arb.req.request = m_arb_request[i];
+         assign m_intf.arb.req.enable = m_arb_enable[i];
          assign m_intf.arb.req.read = m_arb_read[i];
          assign m_intf.arb.req.write = m_arb_write[i];
          assign m_intf.arb.req.burstcount = m_arb_burstcount[i];
@@ -826,6 +870,7 @@ module interconnect_0
    endgenerate
 
    assign mout_arb_request = s.out_arb_intf.req.request;
+   assign mout_arb_enable = s.out_arb_intf.req.enable;
    assign mout_arb_read = s.out_arb_intf.req.read;
    assign mout_arb_write = s.out_arb_intf.req.write;
    assign mout_arb_burstcount = s.out_arb_intf.req.burstcount;
@@ -839,14 +884,15 @@ module interconnect_0
 endmodule
 
 /////////////////////////////////////////////////////////////////
-// MODULE interconnect_1
+// MODULE vector_add_system_interconnect_1
 /////////////////////////////////////////////////////////////////
-module interconnect_1
+module vector_add_system_interconnect_1
 (
    input logic clock,
    input logic resetn,
    // ICM m
    input logic m_arb_request [1],
+   input logic m_arb_enable [1],
    input logic m_arb_read [1],
    input logic m_arb_write [1],
    input logic [4:0] m_arb_burstcount [1],
@@ -859,6 +905,7 @@ module interconnect_1
    output logic [255:0] m_rrp_data [1],
    // ICM mout
    output logic mout_arb_request,
+   output logic mout_arb_enable,
    output logic mout_arb_read,
    output logic mout_arb_write,
    output logic [4:0] mout_arb_burstcount,
@@ -925,6 +972,7 @@ module interconnect_1
          );
 
          assign m_intf.arb.req.request = m_arb_request[i];
+         assign m_intf.arb.req.enable = m_arb_enable[i];
          assign m_intf.arb.req.read = m_arb_read[i];
          assign m_intf.arb.req.write = m_arb_write[i];
          assign m_intf.arb.req.burstcount = m_arb_burstcount[i];
@@ -1014,6 +1062,7 @@ module interconnect_1
    endgenerate
 
    assign mout_arb_request = s.out_arb_intf.req.request;
+   assign mout_arb_enable = s.out_arb_intf.req.enable;
    assign mout_arb_read = s.out_arb_intf.req.read;
    assign mout_arb_write = s.out_arb_intf.req.write;
    assign mout_arb_burstcount = s.out_arb_intf.req.burstcount;
@@ -1027,14 +1076,15 @@ module interconnect_1
 endmodule
 
 /////////////////////////////////////////////////////////////////
-// MODULE interconnect_2
+// MODULE vector_add_system_interconnect_2
 /////////////////////////////////////////////////////////////////
-module interconnect_2
+module vector_add_system_interconnect_2
 (
    input logic clock,
    input logic resetn,
    // ICM m
    input logic m_arb_request [3],
+   input logic m_arb_enable [3],
    input logic m_arb_read [3],
    input logic m_arb_write [3],
    input logic [4:0] m_arb_burstcount [3],
@@ -1047,6 +1097,7 @@ module interconnect_2
    output logic [255:0] m_rrp_data [3],
    // ICM mout
    output logic mout_arb_request,
+   output logic mout_arb_enable,
    output logic mout_arb_read,
    output logic mout_arb_write,
    output logic [4:0] mout_arb_burstcount,
@@ -1113,6 +1164,7 @@ module interconnect_2
          );
 
          assign m_intf.arb.req.request = m_arb_request[i];
+         assign m_intf.arb.req.enable = m_arb_enable[i];
          assign m_intf.arb.req.read = m_arb_read[i];
          assign m_intf.arb.req.write = m_arb_write[i];
          assign m_intf.arb.req.burstcount = m_arb_burstcount[i];
@@ -1267,6 +1319,7 @@ module interconnect_2
    endgenerate
 
    assign mout_arb_request = s.out_arb_intf.req.request;
+   assign mout_arb_enable = s.out_arb_intf.req.enable;
    assign mout_arb_read = s.out_arb_intf.req.read;
    assign mout_arb_write = s.out_arb_intf.req.write;
    assign mout_arb_burstcount = s.out_arb_intf.req.burstcount;

@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -43,59 +43,179 @@ module acl_fifo (
 	parameter NUM_BITS_USED_WORDS = DEPTH == 1 ? 1 : my_local_log(DEPTH-1);
 	parameter ALMOST_FULL_VALUE = 0;
 	parameter LPM_HINT = "unused";
+        parameter string IMPL = "basic";   // impl: (basic|pow_of_2_full|pow_of_2_full_reg_data_in|pow_of_2_full_reg_output_accepted|pow_of_2_full_reg_data_in_reg_output_accepted)
 
 	input clock, stall_in, valid_in, resetn;
 	output stall_out, valid_out;
 	input [DATA_WIDTH-1:0] data_in;
 	output [DATA_WIDTH-1:0] data_out;
 	output [NUM_BITS_USED_WORDS-1:0] usedw;
-  output empty, full, almost_full;
+        output empty, full, almost_full;
 
-  // add a register stage prior to the acl_fifo.
-  //reg [DATA_WIDTH-1:0] data_input /* synthesis preserve */;
-  //reg valid_input /* synthesis preserve */;
-  //always@(posedge clock or negedge resetn)
-  //begin
-  //  if (~resetn)
-  //  begin
-  //    data_input <= {DATA_WIDTH{1'bx}};
-  //    valid_input <= 1'b0;
-  //  end
-  //  else if (~valid_input | ~full)
-  //  begin
-  //    valid_input <= valid_in;
-  //    data_input <= data_in;
-  //  end
-  //end
-  
-	scfifo	scfifo_component (
-				.clock (clock),
-				.data (data_in),
-				.rdreq ((~stall_in) & (~empty)),
-				.sclr (),
-				.wrreq (valid_in & (~full)),
-				.empty (empty),
-				.full (full),
-				.q (data_out),
-				.aclr (~resetn),
-				.almost_empty (),
-				.almost_full (almost_full),
-				.usedw (usedw));
-	defparam
-		scfifo_component.add_ram_output_register = "ON",
-		scfifo_component.intended_device_family = "Stratix IV",
-                scfifo_component.lpm_hint = LPM_HINT,
-		scfifo_component.lpm_numwords = DEPTH,
-		scfifo_component.lpm_showahead = "ON",
-		scfifo_component.lpm_type = "scfifo",
-		scfifo_component.lpm_width = DATA_WIDTH,
-		scfifo_component.lpm_widthu = NUM_BITS_USED_WORDS,
-		scfifo_component.overflow_checking = "ON",
-		scfifo_component.underflow_checking = "ON",
-		scfifo_component.use_eab = "ON",
-		scfifo_component.almost_full_value = ALMOST_FULL_VALUE;
+  generate
+    if ((IMPL == "pow_of_2_full") || 
+        (IMPL == "pow_of_2_full_reg_output_accepted") ||
+        (IMPL == "pow_of_2_full_reg_data_in") ||
+        (IMPL == "pow_of_2_full_reg_data_in_reg_output_accepted"))
+    begin
+          localparam DEPTH_LOG2 = $clog2(DEPTH);
+          localparam DEPTH_SNAPPED_TO_POW_OF_2 = 1 << DEPTH_LOG2;
+          localparam FULL_COUNTER_OFFSET = DEPTH_SNAPPED_TO_POW_OF_2 - DEPTH;
+          
+          localparam ALMOST_FULL_DEPTH_LOG2 = $clog2(DEPTH); // required to be DEPTH, this guarantees that almost_full=1 iff fifo occupancy >= ALMOST_FULL_VALUE
+          localparam ALMOST_FULL_DEPTH_SNAPPED_TO_POW_OF_2 = 1 << ALMOST_FULL_DEPTH_LOG2;
+          localparam ALMOST_FULL_COUNTER_OFFSET = ALMOST_FULL_DEPTH_SNAPPED_TO_POW_OF_2 - ALMOST_FULL_VALUE;
 
-	assign stall_out = full;
-	assign valid_out = ~empty;
-	
+          reg [DEPTH_LOG2:0]              full_counter;
+          reg [ALMOST_FULL_DEPTH_LOG2:0]  almost_full_counter;
+          
+          wire input_accepted_comb;
+          wire input_accepted_for_fifo;
+          wire input_accepted_for_counter;
+          wire output_accepted_comb;
+          wire output_accepted_for_fifo;
+          wire output_accepted_for_counter;
+          wire [DATA_WIDTH-1:0] data_in_for_fifo;
+
+          assign full         = full_counter[DEPTH_LOG2];
+          assign almost_full  = almost_full_counter[ALMOST_FULL_DEPTH_LOG2];
+
+          assign input_accepted_comb  = valid_in & ~full;
+          assign output_accepted_comb = ~stall_in & ~empty;
+
+          assign input_accepted_for_counter = input_accepted_comb;
+          assign output_accepted_for_fifo   = output_accepted_comb;
+
+          if ((IMPL == "pow_of_2_full") || (IMPL=="pow_of_2_full_reg_data_in"))
+          begin
+            assign output_accepted_for_counter = output_accepted_comb;
+          end
+          else // pow_of_2_full_reg_output_accepted, pow_of_2_full_reg_output_accepted_reg_data_in
+          begin
+            reg stall_in_reg;
+            reg empty_reg;
+
+            always @(posedge clock or negedge resetn)
+            begin
+              if (~resetn)
+              begin
+                stall_in_reg  <= 1;
+                empty_reg     <= 1;
+              end
+              else
+              begin
+                stall_in_reg  <= stall_in;
+                empty_reg     <= empty;
+              end
+            end 
+            
+            // registered and retimed version of output_accepted_comb
+            assign output_accepted_for_counter = ~stall_in_reg & ~empty_reg;
+          end
+
+          if ((IMPL == "pow_of_2_full") || (IMPL == "pow_of_2_full_reg_output_accepted")) 
+          begin
+            assign input_accepted_for_fifo    = input_accepted_comb;
+            assign data_in_for_fifo           = data_in;
+          end
+          else // pow_of_2_full_reg_data_in, pow_of_2_full_reg_output_accepted_reg_data_in
+          begin
+            reg input_accepted_reg;
+            reg [DATA_WIDTH-1:0] data_in_reg;
+
+            always @(posedge clock or negedge resetn)
+            begin
+              if (~resetn)
+              begin
+                input_accepted_reg  <= 0;
+              end
+              else
+              begin
+                input_accepted_reg  <= input_accepted_comb;
+                data_in_reg         <= data_in;
+              end
+            end
+
+            assign input_accepted_for_fifo    = input_accepted_reg;
+            assign data_in_for_fifo           = data_in_reg;
+          end
+          
+          always @(posedge clock or negedge resetn)
+          begin
+            if (~resetn)
+            begin
+              full_counter        <= FULL_COUNTER_OFFSET;
+              almost_full_counter <= ALMOST_FULL_COUNTER_OFFSET;
+            end
+            else
+            begin
+              full_counter        <= full_counter         + input_accepted_for_counter - output_accepted_for_counter; 
+              almost_full_counter <= almost_full_counter  + input_accepted_for_counter - output_accepted_for_counter; 
+            end
+          end 
+
+          scfifo	scfifo_component (
+                                  .clock (clock),
+                                  .data (data_in_for_fifo),
+                                  .rdreq (output_accepted_for_fifo),
+                                  .sclr (),
+                                  .wrreq (input_accepted_for_fifo),
+                                  .empty (empty),
+                                  .full (), // dangle and synthesize away SCFIFO's full logic
+                                  .q (data_out),
+                                  .aclr (~resetn),
+                                  .almost_empty (),
+                                  .almost_full (), // dangle and synthesize away SCFIFO's almost_full logic
+                                  .usedw (usedw));
+          defparam
+                  scfifo_component.add_ram_output_register = "ON",
+                  scfifo_component.intended_device_family = "Stratix IV",
+                  scfifo_component.lpm_hint = LPM_HINT,
+                  scfifo_component.lpm_numwords = DEPTH,
+                  scfifo_component.lpm_showahead = "ON",
+                  scfifo_component.lpm_type = "scfifo",
+                  scfifo_component.lpm_width = DATA_WIDTH,
+                  scfifo_component.lpm_widthu = NUM_BITS_USED_WORDS,
+                  scfifo_component.use_eab = "ON",
+                  scfifo_component.almost_full_value = 0; // not used
+
+          assign stall_out = full;
+          assign valid_out = ~empty;
+    end 
+    else 
+    begin // default to "basic"
+
+          scfifo	scfifo_component (
+                                  .clock (clock),
+                                  .data (data_in),
+                                  .rdreq ((~stall_in) & (~empty)),
+                                  .sclr (),
+                                  .wrreq (valid_in & (~full)),
+                                  .empty (empty),
+                                  .full (full),
+                                  .q (data_out),
+                                  .aclr (~resetn),
+                                  .almost_empty (),
+                                  .almost_full (almost_full),
+                                  .usedw (usedw));
+          defparam
+                  scfifo_component.add_ram_output_register = "ON",
+                  scfifo_component.intended_device_family = "Stratix IV",
+                  scfifo_component.lpm_hint = LPM_HINT,
+                  scfifo_component.lpm_numwords = DEPTH,
+                  scfifo_component.lpm_showahead = "ON",
+                  scfifo_component.lpm_type = "scfifo",
+                  scfifo_component.lpm_width = DATA_WIDTH,
+                  scfifo_component.lpm_widthu = NUM_BITS_USED_WORDS,
+                  scfifo_component.overflow_checking = "ON",
+                  scfifo_component.underflow_checking = "ON",
+                  scfifo_component.use_eab = "ON",
+                  scfifo_component.almost_full_value = ALMOST_FULL_VALUE;
+
+          assign stall_out = full;
+          assign valid_out = ~empty;
+    end
+  endgenerate
+
+
 endmodule

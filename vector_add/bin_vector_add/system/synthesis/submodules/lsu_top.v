@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -32,6 +32,12 @@
 //                Requests are submitted as soon as they are received.
 //                Pipelined access to memory so multiple requests can be 
 //                in flight at a time.
+//  Enabled     - STYLE="ENABLED"
+//                Coalesced: No, Ordered: N/A, Hazard-Safe: Yes, Pipelined: Yes
+//                Requests are submitted as soon as they are received.
+//                Pipelined access to memory so multiple requests can be 
+//                in flight at a time. Stalls freeze the pipeline (incl. memory).
+//                Currently only used in enable clusters.
 //  Coalesced   - STYLE="BASIC-COALESCED"
 //   "basic"      Coalesced: Yes, Ordered: Yes, Hazard-Safe: Yes, Pipelined: Yes
 //                Requests are submitted as soon as possible to memory, stalled
@@ -71,7 +77,7 @@ module lsu_top
 (
     clock, clock2x, resetn, stream_base_addr, stream_size, stream_reset, i_atomic_op, o_stall, 
     i_valid, i_address, i_writedata, i_cmpdata, i_predicate, i_bitwiseor, i_stall, o_valid, o_readdata, avm_address, 
-    avm_read, avm_readdata, avm_write, avm_writeack, avm_writedata, avm_byteenable, 
+    avm_enable, avm_read, avm_readdata, avm_write, avm_writeack, avm_writedata, avm_byteenable, 
     avm_waitrequest, avm_readdatavalid, avm_burstcount,
     o_active,
     o_input_fifo_depth,
@@ -121,6 +127,7 @@ parameter USEINPUTFIFO=1;        // FIXME specific to lsu_pipelined
 parameter USEOUTPUTFIFO=1;       // FIXME specific to lsu_pipelined
 parameter FORCE_NOP_SUPPORT=0;   // Stall free pipeline doesn't want the NOP fifo
 parameter HIGH_FMAX=1;       // Enable optimizations for high Fmax
+parameter INTENDED_DEVICE_FAMILY = "Stratix V";
 
 // Profiling
 parameter ACL_PROFILE=0;      // Set to 1 to enable stall/valid profiling
@@ -196,6 +203,7 @@ output [WIDTH-1:0] o_readdata;
 
 // Avalon interface
 output [AWIDTH-1:0] avm_address;
+output avm_enable;
 output avm_read;
 input [WRITEDATAWIDTH-1:0] avm_readdata;
 output avm_write;
@@ -264,6 +272,7 @@ if(WIDE_LSU) begin
 	.i_atomic_op(i_atomic_op),
 	.o_active(o_active),
 	.avm_address(avm_address),
+	.avm_enable(avm_enable),
 	.avm_read(avm_read),
 	.avm_readdata(avm_readdata),
 	.avm_write(avm_write),
@@ -671,6 +680,7 @@ begin
             .avm_waitrequest(avm_waitrequest)
         );
     end
+    assign avm_enable = 1'b1;
 end
 
 ///////////////
@@ -745,6 +755,73 @@ begin
         );
         assign o_readdata = 'bx;
     end
+    assign avm_enable = 1'b1;
+end
+
+///////////////
+// Enabled //
+///////////////
+else if(STYLE=="ENABLED")
+begin
+    wire sub_o_stall;
+    assign lsu_o_stall = sub_o_stall & !i_predicate;
+
+    if(READ == 1)
+    begin
+        lsu_enabled_read #(
+            .KERNEL_SIDE_MEM_LATENCY(KERNEL_SIDE_MEM_LATENCY),
+            .AWIDTH(AWIDTH),
+            .WIDTH_BYTES(WIDTH_BYTES),
+            .MWIDTH_BYTES(MWIDTH_BYTES),
+            .ALIGNMENT_ABITS(ALIGNMENT_ABITS)
+        ) enabled_read (
+            .clk(clock),
+            .reset(!sync_rstn),
+            .o_stall(sub_o_stall),
+            .i_valid(lsu_i_valid),
+            .i_address(address),
+            .i_stall(lsu_i_stall),
+            .o_valid(lsu_o_valid),
+            .o_readdata(o_readdata),
+            .o_active(lsu_active),
+            .avm_address(avm_address_raw),
+            .avm_enable(avm_enable),
+            .avm_read(avm_read),
+            .avm_readdata(avm_readdata),
+            .avm_waitrequest(avm_waitrequest),
+            .avm_byteenable(avm_byteenable),
+            .avm_readdatavalid(avm_readdatavalid)
+        );
+    end
+    else
+    begin
+        lsu_enabled_write #(
+            .AWIDTH(AWIDTH),
+            .WIDTH_BYTES(WIDTH_BYTES),
+            .MWIDTH_BYTES(MWIDTH_BYTES),
+            .USE_BYTE_EN(USE_BYTE_EN),
+            .ALIGNMENT_ABITS(ALIGNMENT_ABITS)
+        ) enabled_write (
+            .clk(clock),
+            .reset(!sync_rstn),
+            .o_stall(sub_o_stall),
+            .i_valid(lsu_i_valid),
+            .i_address(address),
+            .i_byteenable(i_byteenable),
+            .i_writedata(i_writedata),
+            .i_stall(lsu_i_stall),
+            .o_valid(lsu_o_valid),
+            .o_active(lsu_active),
+            .avm_address(avm_address_raw),
+            .avm_enable(avm_enable),
+            .avm_write(avm_write),
+            .avm_writeack(lsu_writeack),
+            .avm_writedata(avm_writedata),
+            .avm_byteenable(avm_byteenable),
+            .avm_waitrequest(avm_waitrequest)
+        );
+        assign o_readdata = 'bx;
+    end
 end
 
 //////////////////////
@@ -785,6 +862,7 @@ begin
            .avm_writeack(lsu_writeack),
            .avm_writedata(avm_writedata)
     );
+   assign avm_enable = 1'b1;
 end
 
 /////////////////////
@@ -845,6 +923,7 @@ begin
             .avm_waitrequest(avm_waitrequest)
         );
     end
+   assign avm_enable = 1'b1;
 end
 
 /////////////////////
@@ -865,7 +944,8 @@ begin
             .USECACHING(USECACHING),
             .HIGH_FMAX(HIGH_FMAX),
             .ACL_PROFILE(ACL_PROFILE),
-            .CACHE_SIZE_N(CACHESIZE)
+            .CACHE_SIZE_N(CACHESIZE),
+            .INTENDED_DEVICE_FAMILY(INTENDED_DEVICE_FAMILY)
         ) bursting_read (
             .clk(clock),
             .clk2x(clock2x),
@@ -894,6 +974,8 @@ begin
         // Non-writeack stores are similar to streaming, where the pipeline
         // needs only few threads which just drop off data, and internally the
         // LSU must account for arbitration contention and other delays.
+        if ((USE_WRITE_ACK == 1) || (USE_WRITE_ACK == 0))
+        begin
         lsu_bursting_write #(
             .KERNEL_SIDE_MEM_LATENCY(KERNEL_SIDE_MEM_LATENCY),
             .MEMORY_SIDE_MEM_LATENCY(MEMORY_SIDE_MEM_LATENCY),
@@ -926,7 +1008,45 @@ begin
             .avm_burstcount(avm_burstcount),
             .avm_waitrequest(avm_waitrequest)
         );
+        end
+        else
+        begin
+        acl_aligned_burst_coalesced_lsu #(
+            .KERNEL_SIDE_MEM_LATENCY(KERNEL_SIDE_MEM_LATENCY),
+            .MEMORY_SIDE_MEM_LATENCY(MEMORY_SIDE_MEM_LATENCY),
+            .AWIDTH(AWIDTH),
+            .WIDTH_BYTES(WIDTH_BYTES),
+            .MWIDTH_BYTES(MWIDTH_BYTES),
+            .ALIGNMENT_ABITS(ALIGNMENT_ABITS),
+            .BURSTCOUNT_WIDTH(BURSTCOUNT_WIDTH),
+            .USE_WRITE_ACK(USE_WRITE_ACK),
+            .USE_BYTE_EN(USE_BYTE_EN),
+            .HIGH_FMAX(HIGH_FMAX),
+            .INTENDED_DEVICE_FAMILY(INTENDED_DEVICE_FAMILY)
+        ) bursting_write (
+            .clock(clock),
+            .clock2x(clock2x),
+            .resetn(sync_rstn),
+            .o_stall(lsu_o_stall),
+            .i_valid(lsu_i_valid),
+            .i_predicate(i_predicate),
+            .i_address(address),
+            .i_writedata(i_writedata),
+            .i_stall(lsu_i_stall),
+            .o_valid(lsu_o_valid),
+            .o_active(lsu_active),
+            .i_byteenable(i_byteenable),
+            .avm_address(avm_address_raw),
+            .avm_write(avm_write),
+            .avm_writeack(lsu_writeack),
+            .avm_writedata(avm_writedata),
+            .avm_byteenable(avm_byteenable),
+            .avm_burstcount(avm_burstcount),
+            .avm_waitrequest(avm_waitrequest)
+        );
+        end
     end
+   assign avm_enable = 1'b1;
 end
 
 
@@ -950,7 +1070,8 @@ begin
             .CACHE_SIZE_N(CACHESIZE),
             .HIGH_FMAX(HIGH_FMAX),
             .ACL_PROFILE(ACL_PROFILE),
-            .UNALIGNED(1)
+            .UNALIGNED(1),
+            .INTENDED_DEVICE_FAMILY(INTENDED_DEVICE_FAMILY)
         ) bursting_non_aligned_read (
             .clk(clock),
             .clk2x(clock2x),
@@ -1012,6 +1133,7 @@ begin
             .extra_unaligned_reqs(extra_unaligned_reqs)
         );
     end
+   assign avm_enable = 1'b1;
 end
 ///////////////
 // Streaming //
@@ -1082,6 +1204,7 @@ begin
          .avm_waitrequest(avm_waitrequest)
      );
    end
+   assign avm_enable = 1'b1;
 end
 ////////////////////
 // SEMI-Streaming //
@@ -1121,6 +1244,7 @@ begin
          .req_cache_hit_count(req_cache_hit_count)
       );
    end
+   assign avm_enable = 1'b1;
 end
 /////////////////
 // Prefetching //
@@ -1140,6 +1264,7 @@ begin
       ) streaming_prefetch_read (
          .clk(clock),
          .reset(!sync_rstn),
+         .flush(flush),
          .o_stall(lsu_o_stall),
          .i_valid(lsu_i_valid),
          .i_stall(lsu_i_stall),
@@ -1195,6 +1320,7 @@ begin
            .extra_unaligned_reqs(extra_unaligned_reqs)
        );
    end
+   assign avm_enable = 1'b1;
 end
 
 
@@ -1223,18 +1349,18 @@ begin
         // count down one burst
         profile_remaining_writeburst_count <= profile_remaining_writeburst_count - 1;      
 
-   assign profile_bw = (READ==1) ? avm_readdatavalid : (avm_write & ~avm_waitrequest);
+   assign profile_bw = ((READ==1) ? avm_readdatavalid : (avm_write & ~avm_waitrequest)) & avm_enable;
    assign profile_bw_incr = MWIDTH_BYTES;
    assign profile_total_ivalid = (i_valid & ~o_stall);
    assign profile_total_req = (i_valid & ~i_predicate & ~o_stall);
    assign profile_i_stall_count = (i_stall & o_valid);
    assign profile_o_stall_count = (o_stall & i_valid);
-   assign profile_avm_readwrite_count = ((avm_read | avm_write) & ~avm_waitrequest & ~active_write_burst);
-   assign profile_avm_burstcount_total = ((avm_read | avm_write) & ~avm_waitrequest & ~active_write_burst);
+   assign profile_avm_readwrite_count = ((avm_read | avm_write) & ~avm_waitrequest & ~active_write_burst & avm_enable);
+   assign profile_avm_burstcount_total = ((avm_read | avm_write) & ~avm_waitrequest & ~active_write_burst & avm_enable);
    assign profile_avm_burstcount_total_incr = avm_burstcount;
    assign profile_req_cache_hit_count = req_cache_hit_count;
    assign profile_extra_unaligned_reqs = extra_unaligned_reqs;
-   assign profile_avm_stall = ((avm_read | avm_write) & avm_waitrequest);
+   assign profile_avm_stall = ((avm_read | avm_write) & avm_waitrequest & avm_enable);
 
 end
 else begin

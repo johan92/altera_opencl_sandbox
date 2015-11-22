@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -133,6 +133,7 @@ module acl_atomics_nostall
    clock, resetn,
 
    // arbitration port
+   mem_arb_enable, //not used
    mem_arb_read,
    mem_arb_write,
    mem_arb_burstcount,
@@ -145,6 +146,7 @@ module acl_atomics_nostall
    mem_arb_writeack,
 
    //  Avalon port
+   mem_avm_enable, //not used
    mem_avm_read,
    mem_avm_write,
    mem_avm_burstcount,
@@ -217,6 +219,7 @@ input logic clock;
 input logic resetn;
 
 // Arbitration port
+input logic mem_arb_enable;
 input logic mem_arb_read;
 input logic mem_arb_write;
 input logic [BURST_WIDTH-1:0] mem_arb_burstcount;
@@ -229,6 +232,7 @@ output logic mem_arb_readdatavalid;
 output logic mem_arb_writeack;
 
 // Avalon port
+output mem_avm_enable;
 output mem_avm_read;
 output mem_avm_write;
 output [BURST_WIDTH-1:0] mem_avm_burstcount;
@@ -370,6 +374,7 @@ endgenerate
 * Arbitration/Avalon connections *
 *********************************/
 
+assign mem_avm_enable = mem_arb_enable;
 assign mem_avm_read = ( send_read || free_tx );
 assign mem_avm_write = ( send_non_atomic_write || send_atomic_write );
 assign mem_avm_burstcount = ( send_read || free_tx || send_non_atomic_write ) ? input_burstcount : burstcount_in_writeback;

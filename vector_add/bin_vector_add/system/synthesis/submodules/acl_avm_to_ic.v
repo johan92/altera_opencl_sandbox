@@ -1,4 +1,4 @@
-// (C) 1992-2014 Altera Corporation. All rights reserved.                         
+// (C) 1992-2015 Altera Corporation. All rights reserved.                         
 // Your use of Altera Corporation's design tools, logic functions and other       
 // software and tools, and its AMPP partner logic functions, and any output       
 // files any of the foregoing (including device programming or simulation         
@@ -23,6 +23,7 @@ module acl_avm_to_ic #(
 )
 (
     // AVM interface
+    input logic avm_enable,
     input logic avm_read,
     input logic avm_write,
     input logic [WRITEDATA_W-1:0] avm_writedata,
@@ -36,6 +37,7 @@ module acl_avm_to_ic #(
 
     // IC interface
     output logic ic_arb_request,
+    output logic ic_arb_enable,
     output logic ic_arb_read,
     output logic ic_arb_write,
     output logic [WRITEDATA_W-1:0] ic_arb_writedata,
@@ -71,6 +73,8 @@ module acl_avm_to_ic #(
     assign ic_arb_burstcount = avm_burstcount;
   
     assign ic_arb_id = {ID_W{1'bx}};
+
+    assign ic_arb_enable = avm_enable;
 
     generate
     if(ADDR_SHIFT==1)

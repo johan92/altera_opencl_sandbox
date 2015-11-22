@@ -1,15 +1,16 @@
-Fitter Status : Successful - Sat Oct 17 21:36:01 2015
-Quartus II 64-Bit Version : 14.1.0 Build 186 12/03/2014 SJ Full Version
+Fitter Status : Successful - Sun Nov 22 13:18:14 2015
+Quartus Prime Version : 15.1.0 Build 185 10/21/2015 SJ Standard Edition
 Revision Name : top
 Top-level Entity Name : top
 Family : Cyclone V
 Device : 5CSEMA5F31C6
 Timing Models : Final
-Logic utilization (in ALMs) : 5,570 / 32,070 ( 17 % )
-Total registers : 9685
+Logic utilization (in ALMs) : 5,472 / 32,070 ( 17 % )
+Total registers : 10409
 Total pins : 103 / 457 ( 23 % )
 Total virtual pins : 0
 Total block memory bits : 127,344 / 4,065,280 ( 3 % )
+Total RAM Blocks : 44 / 397 ( 11 % )
 Total DSP Blocks : 0 / 87 ( 0 % )
 Total HSSI RX PCSs : 0
 Total HSSI PMA RX Deserializers : 0

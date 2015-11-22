@@ -5,7 +5,7 @@ module lsu_wide_wrapper
 (
     clock, clock2x, resetn, stream_base_addr, stream_size, stream_reset, i_atomic_op, o_stall, 
     i_valid, i_address, i_writedata, i_cmpdata, i_predicate, i_bitwiseor, i_stall, o_valid, o_readdata, avm_address, 
-    avm_read, avm_readdata, avm_write, avm_writeack, avm_writedata, avm_byteenable, 
+    avm_enable, avm_read, avm_readdata, avm_write, avm_writeack, avm_writedata, avm_byteenable, 
     avm_waitrequest, avm_readdatavalid, avm_burstcount,
     o_active,
     o_input_fifo_depth,
@@ -135,6 +135,7 @@ output [WIDTH-1:0] o_readdata;
 
 // Avalon interface
 output [AWIDTH-1:0] avm_address;
+output avm_enable;
 output avm_read;
 input [WRITEDATAWIDTH-1:0] avm_readdata;
 output avm_write;
@@ -165,6 +166,7 @@ begin
 
 
    wire [ AWIDTH-1:0] avm_address_wrapped;
+   wire avm_enable_wrapped;
    wire avm_read_wrapped;
    wire [WIDTH-1:0] avm_readdata_wrapped;
    wire avm_write_wrapped;
@@ -199,6 +201,7 @@ begin
      .i_atomic_op(i_atomic_op),
      .o_active(o_active),
      .avm_address(avm_address_wrapped),
+     .avm_enable(avm_enable_wrapped),
      .avm_read(avm_read_wrapped),
      .avm_readdata(avm_readdata_wrapped),
      .avm_write(avm_write_wrapped),
@@ -278,6 +281,7 @@ begin
      assign avm_burstcount = avm_burstcount_wrapped*WIDTH_RATIO;
      assign avm_write  = 0;
      assign avm_read = avm_read_wrapped;
+     assign avm_enable = avm_enable_wrapped;
      
      assign avm_waitrequest_wrapped = avm_waitrequest; 
      //downstream interface
@@ -393,6 +397,7 @@ begin
      assign avm_burstcount = avm_burstcount_reg*WIDTH_RATIO;
      assign avm_write = in_progress;
      assign avm_read = 0;
+     assign avm_enable = avm_enable_wrapped;
  
    end
 
