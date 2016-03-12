@@ -32,6 +32,9 @@ avalon_mm_if #(
   .BURST_COUNT_WIDTH ( 5            )
 ) kernel_sdram_if( );
 
+assign host_sdram_if.clk   = gmem_clk;
+assign kernel_sdram_if.clk = kernel_clk;
+
 initial
   begin
     kernel_clk = 1'b0;
@@ -139,6 +142,10 @@ initial
     test_data_init_done = 1'b1;
   end
 
+assign host_sdram_if.burstcount = 1'd1;
+assign host_sdram_if.byteenable = '1;
+assign host_sdram_if.read       = 1'b0;
+
 initial
   begin
     cra_addr       = '0;
@@ -173,6 +180,16 @@ initial
     cra_write( 4'hE, 64'h0000000000000000, 8'hF0 ); 
     cra_write( 4'h0, 64'h0000000000000001, 8'h0F ); 
   end
+
+// renaming lsu_top modules to more adequate names =)
+initial
+  begin
+    #1ns;
+    top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_ld_.set_inst_name( "load_a" );
+    top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_ld__u0.set_inst_name( "load_b" );
+    top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_st_add.set_inst_name( "write_c" );
+  end
+
 
 vector_add_system dut(
 
