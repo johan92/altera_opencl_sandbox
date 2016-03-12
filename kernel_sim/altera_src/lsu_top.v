@@ -1433,7 +1433,63 @@ end
 end
 endgenerate
 
+// synthesis translate_off
+int tick_cnt;
+
+int last_amm_read = -1;
+int last_amm_write = -1;
+int last_in  = -1;
+int last_out = -1;
+
+string inst_name;
+
+initial
+  begin
+    // set default name
+    $sformat( inst_name, "%m" );
+  end
+
+function automatic set_inst_name( input string s );
+  $display("%m: here!");
+  inst_name = s;
+endfunction 
+
+always_ff @( posedge clock )
+  begin
+    tick_cnt <= tick_cnt + 1'd1;
+  end
+
+always_ff @( posedge clock )
+  begin
+    if( avm_enable )
+      begin
+        if( avm_read && ( avm_waitrequest == 1'b0 ) )
+          begin
+            $display("%0t: %04d[%04d]: %-16s: AVM_READ(%0d): addr = 0x%x", $time(), tick_cnt, tick_cnt - last_amm_read, inst_name, WRITEDATAWIDTH, avm_address );
+            last_amm_read <= tick_cnt;
+          end
+
+        if( avm_write && ( avm_waitrequest == 1'b0 ) )
+          begin
+            $display("%0t: %04d[%04d]: %-16s: AVM_WRITE(%0d): addr = 0x%x data = 0x%x", $time(), tick_cnt, tick_cnt - last_amm_write, 
+              inst_name, WRITEDATAWIDTH, avm_address, avm_writedata );
+            last_amm_write <= tick_cnt;
+          end
+      end
+
+    if( i_valid && ( o_stall == 1'b0 ) )
+      begin
+        $display("%0t: %04d[%04d]: %-16s: IN(%0d): addr = 0x%x data = 0x%x", $time(), tick_cnt, tick_cnt - last_in, inst_name, WIDTH, i_address, i_writedata );
+        last_in <= tick_cnt;
+      end
+
+    if( o_valid && ( i_stall == 1'b0 ) )
+      begin
+        $display("%0t: %04d[%04d]: %-16s: OUT(%0d): data = 0x%x", $time(), tick_cnt, tick_cnt - last_out, inst_name, WIDTH, o_readdata );
+        last_out <= tick_cnt;
+      end
+  end
+
+// synthesis translate_on
+
 endmodule
-
-
-
