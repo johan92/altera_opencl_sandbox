@@ -14,7 +14,7 @@ vlog -sv *.v
 
 vsim -novopt top_tb
 
-add wave -hex sim:/top_tb/*
+add wave -r -hex sim:/top_tb/dut/*
 
 delete wave *altsyncram*
 delete wave *fifo_component*
