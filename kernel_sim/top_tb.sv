@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------------------
+// Project       : aocl-kernel-sim
+//-----------------------------------------------------------------------------
+// Author        : Ivan Shevchuk (github/johan92)
+//-----------------------------------------------------------------------------
+
 `timescale 1 ps / 1 ps
 
 module top_tb;
@@ -25,8 +31,7 @@ localparam RAM_TYPE     = "onchip_ram_256b";
 // if timescale is 1 ps to get here 5 ns need here write 5000 
 localparam KERNEL_CLK_PERIOD = 5000;
 
-// interface for loading data to calculate 
-// in global memory 
+// interface for loading data in global memory before kernels starts 
 avalon_mm_if #(
   .ADDR_WIDTH        ( SDRAM_ADDR_W ),
   .DATA_WIDTH        ( SDRAM_DATA_W ),
