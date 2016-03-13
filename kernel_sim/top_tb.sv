@@ -11,7 +11,7 @@ bit   dut_ready;
 logic ram_init_done = 1'b1;
 logic ram_cal_success = 1'b1;
 
-logic [3:0]  cra_addr;
+logic [7:0]  cra_addr;
 logic [63:0] cra_wr_data;
 logic [7:0]  cra_byteenable;
 logic        cra_wr_en;
@@ -90,7 +90,7 @@ task cra_write( input bit [3:0] _addr, bit [63:0] _data, bit [7:0] _byteenable )
   repeat (10) @( posedge kernel_clk );
 endtask
 
-bit [7:0][31:0] test_data;
+bit [7:0][31:0] test_data = '1;
 
 
 task write_test_data( );
@@ -98,7 +98,7 @@ task write_test_data( );
 
   for( int j = 0; j < 8; j++ )
     begin
-      test_data[ j ] = test_data[j] + 1'd1 + j;
+      test_data[ j ] = test_data[j] + 2*j; // $urandom();
     end
 
   host_sdram_if.writedata <= test_data;
@@ -158,15 +158,15 @@ initial
   begin
     wait( ram_init_done );
     wait( test_data_init_done );
-    cra_write( 4'h5, 64'h000F424000000000, 8'hF0 ); 
     cra_write( 4'h5, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h6, 64'h00000000000F4240, 8'h0F ); 
+    cra_write( 4'h5, 64'h0000000100000000, 8'hF0 ); 
+    cra_write( 4'h6, 64'h0000000000000001, 8'h0F ); 
     cra_write( 4'h6, 64'h0000000100000000, 8'hF0 ); 
     cra_write( 4'h7, 64'h0000000000000001, 8'h0F ); 
     cra_write( 4'h7, 64'h0000000100000000, 8'hF0 ); 
     cra_write( 4'h8, 64'h0000000000000001, 8'h0F ); 
     cra_write( 4'h8, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h9, 64'h00000000000F4240, 8'h0F ); 
+    cra_write( 4'h9, 64'h0000000000000001, 8'h0F ); 
     cra_write( 4'h9, 64'h0000000100000000, 8'hF0 ); 
     cra_write( 4'hA, 64'h0000000000000001, 8'h0F ); 
     cra_write( 4'hA, 64'h0000000000000000, 8'hF0 ); 
@@ -176,8 +176,10 @@ initial
     cra_write( 4'hC, 64'h0000000000000000, 8'hF0 ); 
     cra_write( 4'hD, 64'h0000000000400000, 8'h0F ); 
     cra_write( 4'hD, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hE, 64'h0000000000800000, 8'h0F ); 
+    cra_write( 4'hE, 64'h000000000001f480, 8'h0F ); 
     cra_write( 4'hE, 64'h0000000000000000, 8'hF0 ); 
+    cra_write( 4'hF, 64'h0000000000800000, 8'h0F ); 
+    cra_write( 4'hF, 64'h0000000000000000, 8'hF0 ); 
     cra_write( 4'h0, 64'h0000000000000001, 8'h0F ); 
   end
 
@@ -185,25 +187,28 @@ initial
 initial
   begin
     #1ns;
-    top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_ld_.set_inst_name( "load_a" );
-    top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_ld__u0.set_inst_name( "load_b" );
-    top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_st_add.set_inst_name( "write_c" );
+
+    //top_tb.dut.k.kernel.k_function_inst0.k_basic_block_1.lsu_local_bb1_ld_.set_inst_name( "load_0" );
+    //top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_ld_.set_inst_name( "load_a" );
+    //top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_ld__u0.set_inst_name( "load_b" );
+    //top_tb.dut.vector_add.kernel.vector_add_function_inst0.vector_add_basic_block_0.lsu_local_bb0_st_add.set_inst_name( "write_c" );
   end
 
 
-vector_add_system dut(
+//vector_add_system dut(
+k_system dut(
 
   .clock                                  ( kernel_clk                    ),
   .clock2x                                ( 1'b0                          ),
   .resetn                                 ( ~rst                          ),
   
-  .avs_vector_add_cra_read                ( 1'b0                          ),
-  .avs_vector_add_cra_write               ( cra_wr_en                     ),
-  .avs_vector_add_cra_address             ( cra_addr                      ),
-  .avs_vector_add_cra_writedata           ( cra_wr_data                   ),
-  .avs_vector_add_cra_byteenable          ( cra_byteenable                ),
-  .avs_vector_add_cra_readdata            (                               ),
-  .avs_vector_add_cra_readdatavalid       (                               ),
+  .avs_k_cra_read                ( 1'b0                          ),
+  .avs_k_cra_write               ( cra_wr_en                     ),
+  .avs_k_cra_address             ( cra_addr                      ),
+  .avs_k_cra_writedata           ( cra_wr_data                   ),
+  .avs_k_cra_byteenable          ( cra_byteenable                ),
+  .avs_k_cra_readdata            (                               ),
+  .avs_k_cra_readdatavalid       (                               ),
   
   .kernel_irq                             ( kernel_irq                    ),
 
