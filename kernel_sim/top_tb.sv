@@ -2,7 +2,9 @@
 
 module top_tb;
 
-logic kernel_clk;
+bit kernel_clk;
+bit kernel_clk_x2;
+bit kernel_clk_x4;
 logic gmem_clk;
 logic rst;
 bit   rst_done;
@@ -20,12 +22,18 @@ localparam SDRAM_DATA_W = 256;
 localparam SDRAM_ADDR_W = 32;
 localparam RAM_TYPE     = "onchip_ram_256b";
 
+// if timescale is 1 ps to get here 5 ns need here write 5000 
+localparam KERNEL_CLK_PERIOD = 5000;
+
+// interface for loading data to calculate 
+// in global memory 
 avalon_mm_if #(
   .ADDR_WIDTH        ( SDRAM_ADDR_W ),
   .DATA_WIDTH        ( SDRAM_DATA_W ),
   .BURST_COUNT_WIDTH ( 1            )
 ) host_sdram_if( );
 
+// interface from kernel to global memory
 avalon_mm_if #(
   .ADDR_WIDTH        ( SDRAM_ADDR_W ),
   .DATA_WIDTH        ( SDRAM_DATA_W ),
@@ -37,11 +45,14 @@ assign kernel_sdram_if.clk = kernel_clk;
 
 initial
   begin
-    kernel_clk = 1'b0;
-    forever 
+    kernel_clk_x4 = 1'b0;
+    forever
       begin
-        #3.5ns
-        kernel_clk = !kernel_clk;
+        #((KERNEL_CLK_PERIOD/2)/2)
+        kernel_clk_x2 = !kernel_clk_x2;
+        kernel_clk    = !kernel_clk;
+        #((KERNEL_CLK_PERIOD/2)/2)
+        kernel_clk_x2 = !kernel_clk_x2;
       end
   end
 
@@ -70,31 +81,11 @@ initial
     rst_done <= 1'b1;
   end
 
-task cra_write( input bit [3:0] _addr, bit [63:0] _data, bit [7:0] _byteenable );
-  $display("%m: _addr = 0x%x, _data = 0x%x, _byteenable = 0x%x", 
-                _addr,        _data,        _byteenable );
-
-  @( posedge kernel_clk );
-  cra_addr        <= _addr;
-  cra_wr_data     <= _data;
-  cra_byteenable  <= _byteenable;
-  cra_wr_en       <= 1'b0;
-
-  @( posedge kernel_clk );
-  cra_wr_en       <= 1'b1;
-  
-  @( posedge kernel_clk );
-  cra_wr_en       <= 1'b0;
-  
-  // dummy waiting 
-  repeat (10) @( posedge kernel_clk );
-endtask
 
 bit [7:0][31:0] test_data = '1;
 
-
 task write_test_data( );
-  @( posedge gmem_clk );
+  @( posedge host_sdram_if.clk );
 
   for( int j = 0; j < 8; j++ )
     begin
@@ -104,19 +95,19 @@ task write_test_data( );
   host_sdram_if.writedata <= test_data;
   host_sdram_if.write      <= 1'b0;
   
-  @( posedge gmem_clk );
+  @( posedge host_sdram_if.clk );
   host_sdram_if.write      <= 1'b1;
 
-  @( posedge gmem_clk );
+  @( posedge host_sdram_if.clk );
 
   while( host_sdram_if.waitrequest == 1'b1 )
     begin
-      @( posedge gmem_clk );
+      @( posedge host_sdram_if.clk );
     end
 
   host_sdram_if.write      <= 1'b0;
 
-  repeat (5) @( posedge gmem_clk );
+  repeat (5) @( posedge host_sdram_if.clk );
 endtask
 
 bit test_data_init_done;
@@ -153,6 +144,26 @@ initial
     cra_byteenable = '0;
     cra_wr_en      = '0;
   end
+
+task cra_write( input bit [3:0] _addr, bit [63:0] _data, bit [7:0] _byteenable );
+  $display("%m: _addr = 0x%x, _data = 0x%x, _byteenable = 0x%x", 
+                _addr,        _data,        _byteenable );
+
+  @( posedge kernel_clk );
+  cra_addr        <= _addr;
+  cra_wr_data     <= _data;
+  cra_byteenable  <= _byteenable;
+  cra_wr_en       <= 1'b0;
+
+  @( posedge kernel_clk );
+  cra_wr_en       <= 1'b1;
+  
+  @( posedge kernel_clk );
+  cra_wr_en       <= 1'b0;
+  
+  // dummy waiting 
+  repeat (10) @( posedge kernel_clk );
+endtask
 
 initial
   begin
@@ -199,7 +210,7 @@ initial
 k_system dut(
 
   .clock                                  ( kernel_clk                    ),
-  .clock2x                                ( 1'b0                          ),
+  .clock2x                                ( kernel_clk_x2                 ),
   .resetn                                 ( ~rst                          ),
   
   .avs_k_cra_read                ( 1'b0                          ),
@@ -230,7 +241,7 @@ generate
     begin
       onchip_ram_256b ram(
 
-        .clk_clk                                ( gmem_clk                    ),
+        .clk_clk                                ( host_sdram_if.clk           ),
         .reset_reset_n                          ( !rst                        ),
 
         .host_bridge_1_s0_waitrequest           ( host_sdram_if.waitrequest   ),
@@ -260,7 +271,7 @@ generate
     initial
       begin
         wait( rst_done );
-        repeat( 5 ) @( gmem_clk );
+        repeat( 5 ) @( host_sdram_if.clk );
 
         ram_init_done   = 1'b1;
         ram_cal_success = 1'b1;
