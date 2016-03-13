@@ -1456,13 +1456,21 @@ function automatic set_inst_name( input string s );
   inst_name = s;
 endfunction 
 
-function automatic print( input string pre_s, post_s );
+function automatic print( input string pre_s, string post_s );
   $display("%0t: %s: %s: %s", $time(), pre_s, inst_name, post_s );
 endfunction
 
-function automatic string get_ticks_s( input int _ticks, _last_ticks );
+function automatic string get_ticks_s( input int _ticks, int _last_ticks );
   string s;
-  $sformat( s, "%04d[%04d]", _ticks, _ticks - _last_ticks );
+  string diff_s;
+
+  // if _last_ticks in -1, so it's first time; so no need in diff calcing)
+  if( _last_ticks == -1 )
+    diff_s = "FT"; // first time
+  else
+    $sformat( diff_s, "%4d", _ticks - _last_ticks );
+
+  $sformat( s, "%04d[%4s]", _ticks, diff_s );
   return s;
 endfunction
 
@@ -1472,7 +1480,7 @@ function automatic print_avm_read_req( );
 
   tick_s = get_ticks_s( tick_cnt, last_avm_read_req );
 
-  $sformat( read_req_s, "AVM_READ_REQ(%0d): addr = 0x%x burst = 0x%x byteen = 0x%x",  $bits(avm_readdata), avm_address, avm_burstcount, avm_byteenable );
+  $sformat( read_req_s, "AVM_READ_REQ_%0d: addr = 0x%x burst = 0x%x byteen = 0x%x",  $bits(avm_readdata), avm_address, avm_burstcount, avm_byteenable );
   
   print( tick_s, read_req_s ); 
 endfunction
@@ -1483,18 +1491,25 @@ function automatic print_avm_readdata( );
 
   tick_s = get_ticks_s( tick_cnt, last_avm_read_data );
 
-  $sformat( read_data_s, "AVM_READ(%0d): data = 0x%x", $bits( avm_readdata ), avm_readdata ); 
+  $sformat( read_data_s, "AVM_READ_%0d: data = 0x%x", $bits( avm_readdata ), avm_readdata ); 
 
   print( tick_s, read_data_s );
 endfunction 
+
+bit [AWIDTH-1:0] avm_address_prev = '1;
+int              burst_counter = '0;
 
 function automatic print_avm_write( );
   string tick_s;
   string write_data_s; 
   
+  bit [AWIDTH-1:0] addr;
+
   tick_s = get_ticks_s( tick_cnt, last_avm_write );
 
-  $sformat( write_data_s, "AVM_WRITE(%0d): addr = 0x%x data = 0x%x burst = 0x%x byteen = 0x%x", $bits( avm_writedata ), avm_address, avm_writedata, avm_burstcount, avm_byteenable ); 
+  addr = avm_address + burst_counter * WRITEDATAWIDTH_BYTES; 
+
+  $sformat( write_data_s, "AVM_WRITE_%0d: addr = 0x%x data = 0x%x burst = 0x%x byteen = 0x%x", $bits( avm_writedata ), addr, avm_writedata, avm_burstcount, avm_byteenable ); 
   
   print( tick_s, write_data_s );
 endfunction 
@@ -1507,11 +1522,11 @@ function automatic print_upstream( );
 
   if( READ == 1 )
     begin
-      $sformat( in_s, "IN_R(%0d): addr = 0x%x", $bits( i_writedata ), i_address );
+      $sformat( in_s, "IN_R_%0d: addr = 0x%x", $bits( i_writedata ), i_address );
     end
   else
     begin
-      $sformat( in_s, "IN_W(%0d): addr = 0x%x data = 0x%x", $bits( i_writedata ), i_address, i_writedata );
+      $sformat( in_s, "IN_W_%0d: addr = 0x%x data = 0x%x", $bits( i_writedata ), i_address, i_writedata );
     end
   
   print( tick_s, in_s );
@@ -1525,11 +1540,11 @@ function automatic print_downstream( );
 
   if( READ == 1 )
     begin
-      $sformat( out_s, "OUT_R(%0d): data = 0x%x", $bits( o_readdata ), o_readdata );
+      $sformat( out_s, "OUT_R_%0d: data = 0x%x", $bits( o_readdata ), o_readdata );
     end
   else
     begin
-      $sformat( out_s, "OUT_W(%0d): valid", $bits( o_readdata ) );
+      $sformat( out_s, "OUT_W_%0d: valid", $bits( o_readdata ) );
     end
   
     print( tick_s, out_s );
@@ -1552,8 +1567,17 @@ always_ff @( posedge clock )
 
         if( avm_write && ( avm_waitrequest == 1'b0 ) )
           begin
+            // started new burst
+            if( avm_address != avm_address_prev )
+              begin
+                burst_counter    = '0;
+                avm_address_prev = avm_address;
+              end
+
             print_avm_write( );
+
             last_avm_write <= tick_cnt;
+            burst_counter  <= burst_counter + 1'd1;
           end
       end
 
