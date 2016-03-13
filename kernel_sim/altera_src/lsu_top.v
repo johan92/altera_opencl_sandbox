@@ -1436,8 +1436,10 @@ endgenerate
 // synthesis translate_off
 int tick_cnt;
 
-int last_amm_read = -1;
-int last_amm_write = -1;
+int last_avm_read_req  = -1;
+int last_avm_read_data = -1;
+
+int last_avm_write = -1;
 int last_in  = -1;
 int last_out = -1;
 
@@ -1454,6 +1456,85 @@ function automatic set_inst_name( input string s );
   inst_name = s;
 endfunction 
 
+function automatic print( input string pre_s, post_s );
+  $display("%0t: %s: %s: %s", $time(), pre_s, inst_name, post_s );
+endfunction
+
+function automatic string get_ticks_s( input int _ticks, _last_ticks );
+  string s;
+  $sformat( s, "%04d[%04d]", _ticks, _ticks - _last_ticks );
+  return s;
+endfunction
+
+function automatic print_avm_read_req( );
+  string tick_s;
+  string read_req_s; 
+
+  tick_s = get_ticks_s( tick_cnt, last_avm_read_req );
+
+  $sformat( read_req_s, "AVM_READ_REQ(%0d): addr = 0x%x burst = 0x%x byteen = 0x%x",  $bits(avm_readdata), avm_address, avm_burstcount, avm_byteenable );
+  
+  print( tick_s, read_req_s ); 
+endfunction
+
+function automatic print_avm_readdata( );
+  string tick_s;
+  string read_data_s; 
+
+  tick_s = get_ticks_s( tick_cnt, last_avm_read_data );
+
+  $sformat( read_data_s, "AVM_READ(%0d): data = 0x%x", $bits( avm_readdata ), avm_readdata ); 
+
+  print( tick_s, read_data_s );
+endfunction 
+
+function automatic print_avm_write( );
+  string tick_s;
+  string write_data_s; 
+  
+  tick_s = get_ticks_s( tick_cnt, last_avm_write );
+
+  $sformat( write_data_s, "AVM_WRITE(%0d): addr = 0x%x data = 0x%x burst = 0x%x byteen = 0x%x", $bits( avm_writedata ), avm_address, avm_writedata, avm_burstcount, avm_byteenable ); 
+  
+  print( tick_s, write_data_s );
+endfunction 
+
+function automatic print_upstream( );
+  string tick_s;
+  string in_s; 
+  
+  tick_s = get_ticks_s( tick_cnt, last_in );
+
+  if( READ == 1 )
+    begin
+      $sformat( in_s, "IN_R(%0d): addr = 0x%x", $bits( i_writedata ), i_address );
+    end
+  else
+    begin
+      $sformat( in_s, "IN_W(%0d): addr = 0x%x data = 0x%x", $bits( i_writedata ), i_address, i_writedata );
+    end
+  
+  print( tick_s, in_s );
+endfunction
+
+function automatic print_downstream( );
+  string tick_s;
+  string out_s; 
+  
+  tick_s = get_ticks_s( tick_cnt, last_out );
+
+  if( READ == 1 )
+    begin
+      $sformat( out_s, "OUT_R(%0d): data = 0x%x", $bits( o_readdata ), o_readdata );
+    end
+  else
+    begin
+      $sformat( out_s, "OUT_W(%0d): valid", $bits( o_readdata ) );
+    end
+  
+    print( tick_s, out_s );
+endfunction
+
 always_ff @( posedge clock )
   begin
     tick_cnt <= tick_cnt + 1'd1;
@@ -1465,27 +1546,32 @@ always_ff @( posedge clock )
       begin
         if( avm_read && ( avm_waitrequest == 1'b0 ) )
           begin
-            $display("%0t: %04d[%04d]: %-16s: AVM_READ(%0d): addr = 0x%x", $time(), tick_cnt, tick_cnt - last_amm_read, inst_name, WRITEDATAWIDTH, avm_address );
-            last_amm_read <= tick_cnt;
+            print_avm_read_req( );
+            last_avm_read_req <= tick_cnt;
           end
 
         if( avm_write && ( avm_waitrequest == 1'b0 ) )
           begin
-            $display("%0t: %04d[%04d]: %-16s: AVM_WRITE(%0d): addr = 0x%x data = 0x%x", $time(), tick_cnt, tick_cnt - last_amm_write, 
-              inst_name, WRITEDATAWIDTH, avm_address, avm_writedata );
-            last_amm_write <= tick_cnt;
+            print_avm_write( );
+            last_avm_write <= tick_cnt;
           end
+      end
+
+    if( avm_readdatavalid )
+      begin
+        print_avm_readdata( );
+        last_avm_read_data <= tick_cnt;
       end
 
     if( i_valid && ( o_stall == 1'b0 ) )
       begin
-        $display("%0t: %04d[%04d]: %-16s: IN(%0d): addr = 0x%x data = 0x%x", $time(), tick_cnt, tick_cnt - last_in, inst_name, WIDTH, i_address, i_writedata );
+        print_upstream( );
         last_in <= tick_cnt;
       end
 
     if( o_valid && ( i_stall == 1'b0 ) )
       begin
-        $display("%0t: %04d[%04d]: %-16s: OUT(%0d): data = 0x%x", $time(), tick_cnt, tick_cnt - last_out, inst_name, WIDTH, o_readdata );
+        print_downstream( );
         last_out <= tick_cnt;
       end
   end
