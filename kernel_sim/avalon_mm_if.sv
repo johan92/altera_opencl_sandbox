@@ -6,17 +6,28 @@ interface avalon_mm_if #(
 )
 ( );
 
+// HACK:
+// using wire here to get of modelsim error:
+// "written by continuous and procedural assignments"
+// this error happend because signals `address`, `writedata`, etc
+// got two variant to set:
+//   - from clocking block
+//   - from wire
+//
+// idea from:
+// http://verificationguild.com/modules.php?name=Forums&file=viewtopic&p=21149
+
 logic                          clk;
-logic [ADDR_WIDTH-1:0]         address;
-logic [BURST_COUNT_WIDTH-1:0]  burstcount;
-logic [DATA_WIDTH-1:0]         writedata;
+wire  [ADDR_WIDTH-1:0]         address;
+wire  [BURST_COUNT_WIDTH-1:0]  burstcount;
+wire  [DATA_WIDTH-1:0]         writedata;
 logic [DATA_WIDTH-1:0]         readdata;
 
-logic [BYTE_ENABLE_WIDTH-1:0]  byteenable;
+wire  [BYTE_ENABLE_WIDTH-1:0]  byteenable;
 
 logic                          readdatavalid;
-logic                          write;
-logic                          read;
+wire                           write;
+wire                           read;
 logic                          waitrequest;
 
 modport master(
@@ -49,5 +60,18 @@ modport slave(
           readdatavalid
 
 );
+
+clocking cb @( posedge clk );
+  output  address,
+          burstcount,
+          writedata,
+          byteenable,
+          write,
+          read;
+
+  input   waitrequest,
+          readdata,
+          readdatavalid;
+endclocking 
 
 endinterface

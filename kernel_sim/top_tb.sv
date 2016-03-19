@@ -34,7 +34,7 @@ localparam KERNEL_CLK_PERIOD = 5000;
 // interface for loading data in global memory before kernels starts 
 avalon_mm_if #(
   .ADDR_WIDTH        ( SDRAM_ADDR_W ),
-  .DATA_WIDTH        ( SDRAM_DATA_W ),
+  .DATA_WIDTH        ( 32           ),
   .BURST_COUNT_WIDTH ( 1            )
 ) host_sdram_if( );
 
@@ -86,60 +86,54 @@ initial
     rst_done <= 1'b1;
   end
 
+task write_host_if( input bit [31:0] _addr, 
+                          bit [31:0] _data,
+                          bit [3:0]  _byteenable = '1
+                  );
 
-bit [7:0][31:0] test_data = '1;
+  host_sdram_if.cb.address    <= _addr;
+  host_sdram_if.cb.writedata  <= _data;
+  host_sdram_if.cb.write      <= 1'b0;
+  host_sdram_if.cb.byteenable <= _byteenable;
 
-task write_test_data( );
-  @( posedge host_sdram_if.clk );
-
-  for( int j = 0; j < 8; j++ )
-    begin
-      test_data[ j ] = test_data[j] + 2*j; // $urandom();
-    end
-
-  host_sdram_if.writedata <= test_data;
-  host_sdram_if.write      <= 1'b0;
+  @( host_sdram_if.cb );
+  host_sdram_if.cb.write     <= 1'b1;
   
-  @( posedge host_sdram_if.clk );
-  host_sdram_if.write      <= 1'b1;
-
-  @( posedge host_sdram_if.clk );
-
-  while( host_sdram_if.waitrequest == 1'b1 )
+  @( host_sdram_if.cb );
+  while( host_sdram_if.cb.waitrequest == 1'b1 )
     begin
-      @( posedge host_sdram_if.clk );
+      @( host_sdram_if.cb );
     end
+  
+  host_sdram_if.cb.write     <= 1'b0;
 
-  host_sdram_if.write      <= 1'b0;
-
-  repeat (5) @( posedge host_sdram_if.clk );
 endtask
 
 bit test_data_init_done;
 
 initial
   begin
+    wait( rst_done      );
     wait( ram_init_done );
-    host_sdram_if.address <= 32'h0;
 
-    for( int i = 0; i < 256; i++ )
+    repeat(10) @( posedge host_sdram_if.clk );
+    
+    // initialize first buffer
+    for( int i = 0; i < 128; i++ )
       begin
-        write_test_data( );
-        host_sdram_if.address <= host_sdram_if.address + 32'h20;
+        write_host_if( 32'h0 + ( i * 4 ), i );
       end
-
-    host_sdram_if.address <= 32'h400000;
-    for( int i = 0; i < 256; i++ )
+    
+    // initialize second buffer
+    for( int i = 0; i < 128; i++ )
       begin
-        write_test_data( );
-        host_sdram_if.address <= host_sdram_if.address + 32'h20;
+        write_host_if( 32'h1000 + ( i * 4 ), 2*i + 1 );
       end
 
     test_data_init_done = 1'b1;
   end
 
 assign host_sdram_if.burstcount = 1'd1;
-assign host_sdram_if.byteenable = '1;
 assign host_sdram_if.read       = 1'b0;
 
 initial
@@ -190,11 +184,11 @@ initial
     cra_write( 4'hB, 64'h0000000000000000, 8'hF0 ); 
     cra_write( 4'hC, 64'h0000000000000000, 8'h0F ); 
     cra_write( 4'hC, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hD, 64'h0000000000400000, 8'h0F ); 
+    cra_write( 4'hD, 64'h0000000000001000, 8'h0F ); 
     cra_write( 4'hD, 64'h0000000000000000, 8'hF0 ); 
     cra_write( 4'hE, 64'h000000000001f480, 8'h0F ); 
     cra_write( 4'hE, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hF, 64'h0000000000800000, 8'h0F ); 
+    cra_write( 4'hF, 64'h0000000000002000, 8'h0F ); 
     cra_write( 4'hF, 64'h0000000000000000, 8'hF0 ); 
     cra_write( 4'h0, 64'h0000000000000001, 8'h0F ); 
   end
@@ -211,20 +205,20 @@ initial
   end
 
 
-//vector_add_system dut(
-k_system dut(
+vector_add_system dut(
+//k_system dut(
 
   .clock                                  ( kernel_clk                    ),
   .clock2x                                ( kernel_clk_x2                 ),
   .resetn                                 ( ~rst                          ),
   
-  .avs_k_cra_read                ( 1'b0                          ),
-  .avs_k_cra_write               ( cra_wr_en                     ),
-  .avs_k_cra_address             ( cra_addr                      ),
-  .avs_k_cra_writedata           ( cra_wr_data                   ),
-  .avs_k_cra_byteenable          ( cra_byteenable                ),
-  .avs_k_cra_readdata            (                               ),
-  .avs_k_cra_readdatavalid       (                               ),
+  .avs_vector_add_cra_read                ( 1'b0                          ),
+  .avs_vector_add_cra_write               ( cra_wr_en                     ),
+  .avs_vector_add_cra_address             ( cra_addr                      ),
+  .avs_vector_add_cra_writedata           ( cra_wr_data                   ),
+  .avs_vector_add_cra_byteenable          ( cra_byteenable                ),
+  .avs_vector_add_cra_readdata            (                               ),
+  .avs_vector_add_cra_readdatavalid       (                               ),
   
   .kernel_irq                             ( kernel_irq                    ),
 
@@ -249,16 +243,16 @@ generate
         .clk_clk                                ( host_sdram_if.clk           ),
         .reset_reset_n                          ( !rst                        ),
 
-        .host_bridge_1_s0_waitrequest           ( host_sdram_if.waitrequest   ),
-        .host_bridge_1_s0_readdata              ( host_sdram_if.readdata      ),
-        .host_bridge_1_s0_readdatavalid         ( host_sdram_if.readdatavalid ),
-        .host_bridge_1_s0_burstcount            ( host_sdram_if.burstcount    ),
-        .host_bridge_1_s0_writedata             ( host_sdram_if.writedata     ),
-        .host_bridge_1_s0_address               ( host_sdram_if.address       ),
-        .host_bridge_1_s0_write                 ( host_sdram_if.write         ),
-        .host_bridge_1_s0_read                  ( host_sdram_if.read          ),
-        .host_bridge_1_s0_byteenable            ( host_sdram_if.byteenable    ),
-        .host_bridge_1_s0_debugaccess           (                             ),
+        .host_bridge_s0_waitrequest             ( host_sdram_if.waitrequest   ),
+        .host_bridge_s0_readdata                ( host_sdram_if.readdata      ),
+        .host_bridge_s0_readdatavalid           ( host_sdram_if.readdatavalid ),
+        .host_bridge_s0_burstcount              ( host_sdram_if.burstcount    ),
+        .host_bridge_s0_writedata               ( host_sdram_if.writedata     ),
+        .host_bridge_s0_address                 ( host_sdram_if.address       ),
+        .host_bridge_s0_write                   ( host_sdram_if.write         ),
+        .host_bridge_s0_read                    ( host_sdram_if.read          ),
+        .host_bridge_s0_byteenable              ( host_sdram_if.byteenable    ),
+        .host_bridge_s0_debugaccess             (                             ),
 
         .kernel_bridge_s0_waitrequest           ( kernel_sdram_if.waitrequest   ),
         .kernel_bridge_s0_readdata              ( kernel_sdram_if.readdata      ),
