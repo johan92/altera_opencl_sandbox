@@ -45,8 +45,15 @@ avalon_mm_if #(
   .BURST_COUNT_WIDTH ( 5            )
 ) kernel_sdram_if( );
 
+avalon_mm_if #(
+  .ADDR_WIDTH        ( 8      ),
+  .DATA_WIDTH        ( 64     ),
+  .BURST_COUNT_WIDTH ( 1      )
+) cra_if( );
+
 assign host_sdram_if.clk   = gmem_clk;
 assign kernel_sdram_if.clk = kernel_clk;
+assign cra_if.clk          = kernel_clk;
 
 initial
   begin
@@ -86,29 +93,6 @@ initial
     rst_done <= 1'b1;
   end
 
-task write_host_if( input bit [31:0] _addr, 
-                          bit [31:0] _data,
-                          bit [3:0]  _byteenable = '1
-                  );
-
-  host_sdram_if.cb.address    <= _addr;
-  host_sdram_if.cb.writedata  <= _data;
-  host_sdram_if.cb.write      <= 1'b0;
-  host_sdram_if.cb.byteenable <= _byteenable;
-
-  @( host_sdram_if.cb );
-  host_sdram_if.cb.write     <= 1'b1;
-  
-  @( host_sdram_if.cb );
-  while( host_sdram_if.cb.waitrequest == 1'b1 )
-    begin
-      @( host_sdram_if.cb );
-    end
-  
-  host_sdram_if.cb.write     <= 1'b0;
-
-endtask
-
 bit test_data_init_done;
 
 initial
@@ -121,76 +105,46 @@ initial
     // initialize first buffer
     for( int i = 0; i < 128; i++ )
       begin
-        write_host_if( 32'h0 + ( i * 4 ), i );
+        host_sdram_if.write_word( 32'h0 + ( i * 4 ), i );
       end
     
     // initialize second buffer
     for( int i = 0; i < 128; i++ )
       begin
-        write_host_if( 32'h1000 + ( i * 4 ), 2*i + 1 );
+        host_sdram_if.write_word( 32'h1000 + ( i * 4 ), 2*i + 1 );
       end
 
     test_data_init_done = 1'b1;
   end
 
 assign host_sdram_if.burstcount = 1'd1;
-assign host_sdram_if.read       = 1'b0;
-
-initial
-  begin
-    cra_addr       = '0;
-    cra_wr_data    = '0;
-    cra_byteenable = '0;
-    cra_wr_en      = '0;
-  end
-
-task cra_write( input bit [3:0] _addr, bit [63:0] _data, bit [7:0] _byteenable );
-  $display("%m: _addr = 0x%x, _data = 0x%x, _byteenable = 0x%x", 
-                _addr,        _data,        _byteenable );
-
-  @( posedge kernel_clk );
-  cra_addr        <= _addr;
-  cra_wr_data     <= _data;
-  cra_byteenable  <= _byteenable;
-  cra_wr_en       <= 1'b0;
-
-  @( posedge kernel_clk );
-  cra_wr_en       <= 1'b1;
-  
-  @( posedge kernel_clk );
-  cra_wr_en       <= 1'b0;
-  
-  // dummy waiting 
-  repeat (10) @( posedge kernel_clk );
-endtask
 
 initial
   begin
     wait( ram_init_done );
     wait( test_data_init_done );
-    cra_write( 4'h5, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h5, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h6, 64'h0000000000000001, 8'h0F ); 
-    cra_write( 4'h6, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h7, 64'h0000000000000001, 8'h0F ); 
-    cra_write( 4'h7, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h8, 64'h0000000000000001, 8'h0F ); 
-    cra_write( 4'h8, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'h9, 64'h0000000000000001, 8'h0F ); 
-    cra_write( 4'h9, 64'h0000000100000000, 8'hF0 ); 
-    cra_write( 4'hA, 64'h0000000000000001, 8'h0F ); 
-    cra_write( 4'hA, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hB, 64'h0000000000000000, 8'h0F ); 
-    cra_write( 4'hB, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hC, 64'h0000000000000000, 8'h0F ); 
-    cra_write( 4'hC, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hD, 64'h0000000000001000, 8'h0F ); 
-    cra_write( 4'hD, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hE, 64'h000000000001f480, 8'h0F ); 
-    cra_write( 4'hE, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'hF, 64'h0000000000002000, 8'h0F ); 
-    cra_write( 4'hF, 64'h0000000000000000, 8'hF0 ); 
-    cra_write( 4'h0, 64'h0000000000000001, 8'h0F ); 
+    cra_if.write_word( 4'h5, 64'h0000000100000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'h6, 64'h0000000000000001, 8'h0F, 1 ); 
+    cra_if.write_word( 4'h6, 64'h0000000100000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'h7, 64'h0000000000000001, 8'h0F, 1 ); 
+    cra_if.write_word( 4'h7, 64'h0000000100000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'h8, 64'h0000000000000001, 8'h0F, 1 ); 
+    cra_if.write_word( 4'h8, 64'h0000000100000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'h9, 64'h0000000000000001, 8'h0F, 1 ); 
+    cra_if.write_word( 4'h9, 64'h0000000100000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'hA, 64'h0000000000000001, 8'h0F, 1 ); 
+    cra_if.write_word( 4'hA, 64'h0000000000000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'hB, 64'h0000000000000000, 8'h0F, 1 ); 
+    cra_if.write_word( 4'hB, 64'h0000000000000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'hC, 64'h0000000000000000, 8'h0F, 1 ); 
+    cra_if.write_word( 4'hC, 64'h0000000000000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'hD, 64'h0000000000001000, 8'h0F, 1 ); 
+    cra_if.write_word( 4'hD, 64'h0000000000000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'hE, 64'h000000000001f480, 8'h0F, 1 ); 
+    cra_if.write_word( 4'hE, 64'h0000000000000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'hF, 64'h0000000000002000, 8'h0F, 1 ); 
+    cra_if.write_word( 4'hF, 64'h0000000000000000, 8'hF0, 1 ); 
+    cra_if.write_word( 4'h0, 64'h0000000000000001, 8'h0F, 1 ); 
   end
 
 // renaming lsu_top modules to more adequate names =)
@@ -212,11 +166,11 @@ vector_add_system dut(
   .clock2x                                ( kernel_clk_x2                 ),
   .resetn                                 ( ~rst                          ),
   
-  .avs_vector_add_cra_read                ( 1'b0                          ),
-  .avs_vector_add_cra_write               ( cra_wr_en                     ),
-  .avs_vector_add_cra_address             ( cra_addr                      ),
-  .avs_vector_add_cra_writedata           ( cra_wr_data                   ),
-  .avs_vector_add_cra_byteenable          ( cra_byteenable                ),
+  .avs_vector_add_cra_read                ( cra_if.read                   ),
+  .avs_vector_add_cra_write               ( cra_if.write                  ),
+  .avs_vector_add_cra_address             ( cra_if.address                ),
+  .avs_vector_add_cra_writedata           ( cra_if.writedata              ),
+  .avs_vector_add_cra_byteenable          ( cra_if.byteenable             ),
   .avs_vector_add_cra_readdata            (                               ),
   .avs_vector_add_cra_readdatavalid       (                               ),
   
@@ -234,6 +188,8 @@ vector_add_system dut(
   .avm_memgmem0_port_0_0_rw_writeack      ( 1'bx                          )
 );
 
+// no waitrequest signal in cra_kernel_system, so, suggest it is zero
+assign cra_if.waitrequest = 1'b0;
 
 generate 
   if( RAM_TYPE == "onchip_ram_256b" )

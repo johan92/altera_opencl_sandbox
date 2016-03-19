@@ -74,4 +74,36 @@ clocking cb @( posedge clk );
           readdatavalid;
 endclocking 
 
+task write_word( input bit [ADDR_WIDTH-1:0]         _addr, 
+                       bit [DATA_WIDTH-1:0]         _data,
+                       bit [BYTE_ENABLE_WIDTH-1:0]  _byteenable = '1,
+                       bit                          _verbose    = 1'b0
+               );
+  
+  if( _verbose )
+    begin
+      $display("%m: _addr = 0x%x, _data = 0x%x, _byteenable = 0x%x", 
+                    _addr,        _data,        _byteenable );
+    end
+
+  cb.read       <= 1'b0;
+
+  cb.address    <= _addr;
+  cb.writedata  <= _data;
+  cb.write      <= 1'b0;
+  cb.byteenable <= _byteenable;
+
+  @( cb );
+  cb.write     <= 1'b1;
+  
+  @( cb );
+  while( cb.waitrequest == 1'b1 )
+    begin
+      @( cb );
+    end
+  
+  cb.write     <= 1'b0;
+
+endtask
+
 endinterface
