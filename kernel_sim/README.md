@@ -73,12 +73,12 @@ vsim -do make.do
 See log (`transcript`) and/or waveforms.
 
 ## example
-I add `vector\_add` example that generates from this kernel:
+I add `vector_add` example that generates from this kernel:
 
 ```opencl
 __kernel void vector_add( __global const uint *restrict x, 
-    __global const uint *restrict y, 
-    __global       uint *restrict z )
+                          __global const uint *restrict y, 
+                          __global       uint *restrict z )
 {
   // get index of the work item
   int index = get_global_id(0);
