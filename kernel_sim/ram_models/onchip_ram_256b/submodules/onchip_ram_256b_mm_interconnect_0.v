@@ -8,16 +8,16 @@
 `timescale 1 ps / 1 ps
 module onchip_ram_256b_mm_interconnect_0 (
 		input  wire         clk_0_clk_clk,                                   //                                 clk_0_clk.clk
-		input  wire         host_bridge_1_reset_reset_bridge_in_reset_reset, // host_bridge_1_reset_reset_bridge_in_reset.reset
+		input  wire         kernel_bridge_reset_reset_bridge_in_reset_reset, // kernel_bridge_reset_reset_bridge_in_reset.reset
 		input  wire [22:0]  host_bridge_1_m0_address,                        //                          host_bridge_1_m0.address
 		output wire         host_bridge_1_m0_waitrequest,                    //                                          .waitrequest
 		input  wire [0:0]   host_bridge_1_m0_burstcount,                     //                                          .burstcount
-		input  wire [31:0]  host_bridge_1_m0_byteenable,                     //                                          .byteenable
+		input  wire [3:0]   host_bridge_1_m0_byteenable,                     //                                          .byteenable
 		input  wire         host_bridge_1_m0_read,                           //                                          .read
-		output wire [255:0] host_bridge_1_m0_readdata,                       //                                          .readdata
+		output wire [31:0]  host_bridge_1_m0_readdata,                       //                                          .readdata
 		output wire         host_bridge_1_m0_readdatavalid,                  //                                          .readdatavalid
 		input  wire         host_bridge_1_m0_write,                          //                                          .write
-		input  wire [255:0] host_bridge_1_m0_writedata,                      //                                          .writedata
+		input  wire [31:0]  host_bridge_1_m0_writedata,                      //                                          .writedata
 		input  wire         host_bridge_1_m0_debugaccess,                    //                                          .debugaccess
 		input  wire [22:0]  kernel_bridge_m0_address,                        //                          kernel_bridge_m0.address
 		output wire         kernel_bridge_m0_waitrequest,                    //                                          .waitrequest
@@ -38,23 +38,6 @@ module onchip_ram_256b_mm_interconnect_0 (
 		output wire         onchip_memory2_0_s1_clken                        //                                          .clken
 	);
 
-	wire          host_bridge_1_m0_translator_avalon_universal_master_0_waitrequest;   // host_bridge_1_m0_agent:av_waitrequest -> host_bridge_1_m0_translator:uav_waitrequest
-	wire  [255:0] host_bridge_1_m0_translator_avalon_universal_master_0_readdata;      // host_bridge_1_m0_agent:av_readdata -> host_bridge_1_m0_translator:uav_readdata
-	wire          host_bridge_1_m0_translator_avalon_universal_master_0_debugaccess;   // host_bridge_1_m0_translator:uav_debugaccess -> host_bridge_1_m0_agent:av_debugaccess
-	wire   [22:0] host_bridge_1_m0_translator_avalon_universal_master_0_address;       // host_bridge_1_m0_translator:uav_address -> host_bridge_1_m0_agent:av_address
-	wire          host_bridge_1_m0_translator_avalon_universal_master_0_read;          // host_bridge_1_m0_translator:uav_read -> host_bridge_1_m0_agent:av_read
-	wire   [31:0] host_bridge_1_m0_translator_avalon_universal_master_0_byteenable;    // host_bridge_1_m0_translator:uav_byteenable -> host_bridge_1_m0_agent:av_byteenable
-	wire          host_bridge_1_m0_translator_avalon_universal_master_0_readdatavalid; // host_bridge_1_m0_agent:av_readdatavalid -> host_bridge_1_m0_translator:uav_readdatavalid
-	wire          host_bridge_1_m0_translator_avalon_universal_master_0_lock;          // host_bridge_1_m0_translator:uav_lock -> host_bridge_1_m0_agent:av_lock
-	wire          host_bridge_1_m0_translator_avalon_universal_master_0_write;         // host_bridge_1_m0_translator:uav_write -> host_bridge_1_m0_agent:av_write
-	wire  [255:0] host_bridge_1_m0_translator_avalon_universal_master_0_writedata;     // host_bridge_1_m0_translator:uav_writedata -> host_bridge_1_m0_agent:av_writedata
-	wire    [5:0] host_bridge_1_m0_translator_avalon_universal_master_0_burstcount;    // host_bridge_1_m0_translator:uav_burstcount -> host_bridge_1_m0_agent:av_burstcount
-	wire          rsp_mux_src_valid;                                                   // rsp_mux:src_valid -> host_bridge_1_m0_agent:rp_valid
-	wire  [351:0] rsp_mux_src_data;                                                    // rsp_mux:src_data -> host_bridge_1_m0_agent:rp_data
-	wire          rsp_mux_src_ready;                                                   // host_bridge_1_m0_agent:rp_ready -> rsp_mux:src_ready
-	wire    [1:0] rsp_mux_src_channel;                                                 // rsp_mux:src_channel -> host_bridge_1_m0_agent:rp_channel
-	wire          rsp_mux_src_startofpacket;                                           // rsp_mux:src_startofpacket -> host_bridge_1_m0_agent:rp_startofpacket
-	wire          rsp_mux_src_endofpacket;                                             // rsp_mux:src_endofpacket -> host_bridge_1_m0_agent:rp_endofpacket
 	wire          kernel_bridge_m0_translator_avalon_universal_master_0_waitrequest;   // kernel_bridge_m0_agent:av_waitrequest -> kernel_bridge_m0_translator:uav_waitrequest
 	wire  [255:0] kernel_bridge_m0_translator_avalon_universal_master_0_readdata;      // kernel_bridge_m0_agent:av_readdata -> kernel_bridge_m0_translator:uav_readdata
 	wire          kernel_bridge_m0_translator_avalon_universal_master_0_debugaccess;   // kernel_bridge_m0_translator:uav_debugaccess -> kernel_bridge_m0_agent:av_debugaccess
@@ -66,12 +49,23 @@ module onchip_ram_256b_mm_interconnect_0 (
 	wire          kernel_bridge_m0_translator_avalon_universal_master_0_write;         // kernel_bridge_m0_translator:uav_write -> kernel_bridge_m0_agent:av_write
 	wire  [255:0] kernel_bridge_m0_translator_avalon_universal_master_0_writedata;     // kernel_bridge_m0_translator:uav_writedata -> kernel_bridge_m0_agent:av_writedata
 	wire    [9:0] kernel_bridge_m0_translator_avalon_universal_master_0_burstcount;    // kernel_bridge_m0_translator:uav_burstcount -> kernel_bridge_m0_agent:av_burstcount
-	wire          rsp_mux_001_src_valid;                                               // rsp_mux_001:src_valid -> kernel_bridge_m0_agent:rp_valid
-	wire  [351:0] rsp_mux_001_src_data;                                                // rsp_mux_001:src_data -> kernel_bridge_m0_agent:rp_data
-	wire          rsp_mux_001_src_ready;                                               // kernel_bridge_m0_agent:rp_ready -> rsp_mux_001:src_ready
-	wire    [1:0] rsp_mux_001_src_channel;                                             // rsp_mux_001:src_channel -> kernel_bridge_m0_agent:rp_channel
-	wire          rsp_mux_001_src_startofpacket;                                       // rsp_mux_001:src_startofpacket -> kernel_bridge_m0_agent:rp_startofpacket
-	wire          rsp_mux_001_src_endofpacket;                                         // rsp_mux_001:src_endofpacket -> kernel_bridge_m0_agent:rp_endofpacket
+	wire          rsp_mux_src_valid;                                                   // rsp_mux:src_valid -> kernel_bridge_m0_agent:rp_valid
+	wire  [351:0] rsp_mux_src_data;                                                    // rsp_mux:src_data -> kernel_bridge_m0_agent:rp_data
+	wire          rsp_mux_src_ready;                                                   // kernel_bridge_m0_agent:rp_ready -> rsp_mux:src_ready
+	wire    [1:0] rsp_mux_src_channel;                                                 // rsp_mux:src_channel -> kernel_bridge_m0_agent:rp_channel
+	wire          rsp_mux_src_startofpacket;                                           // rsp_mux:src_startofpacket -> kernel_bridge_m0_agent:rp_startofpacket
+	wire          rsp_mux_src_endofpacket;                                             // rsp_mux:src_endofpacket -> kernel_bridge_m0_agent:rp_endofpacket
+	wire          host_bridge_1_m0_translator_avalon_universal_master_0_waitrequest;   // host_bridge_1_m0_agent:av_waitrequest -> host_bridge_1_m0_translator:uav_waitrequest
+	wire   [31:0] host_bridge_1_m0_translator_avalon_universal_master_0_readdata;      // host_bridge_1_m0_agent:av_readdata -> host_bridge_1_m0_translator:uav_readdata
+	wire          host_bridge_1_m0_translator_avalon_universal_master_0_debugaccess;   // host_bridge_1_m0_translator:uav_debugaccess -> host_bridge_1_m0_agent:av_debugaccess
+	wire   [22:0] host_bridge_1_m0_translator_avalon_universal_master_0_address;       // host_bridge_1_m0_translator:uav_address -> host_bridge_1_m0_agent:av_address
+	wire          host_bridge_1_m0_translator_avalon_universal_master_0_read;          // host_bridge_1_m0_translator:uav_read -> host_bridge_1_m0_agent:av_read
+	wire    [3:0] host_bridge_1_m0_translator_avalon_universal_master_0_byteenable;    // host_bridge_1_m0_translator:uav_byteenable -> host_bridge_1_m0_agent:av_byteenable
+	wire          host_bridge_1_m0_translator_avalon_universal_master_0_readdatavalid; // host_bridge_1_m0_agent:av_readdatavalid -> host_bridge_1_m0_translator:uav_readdatavalid
+	wire          host_bridge_1_m0_translator_avalon_universal_master_0_lock;          // host_bridge_1_m0_translator:uav_lock -> host_bridge_1_m0_agent:av_lock
+	wire          host_bridge_1_m0_translator_avalon_universal_master_0_write;         // host_bridge_1_m0_translator:uav_write -> host_bridge_1_m0_agent:av_write
+	wire   [31:0] host_bridge_1_m0_translator_avalon_universal_master_0_writedata;     // host_bridge_1_m0_translator:uav_writedata -> host_bridge_1_m0_agent:av_writedata
+	wire    [2:0] host_bridge_1_m0_translator_avalon_universal_master_0_burstcount;    // host_bridge_1_m0_translator:uav_burstcount -> host_bridge_1_m0_agent:av_burstcount
 	wire  [255:0] onchip_memory2_0_s1_agent_m0_readdata;                               // onchip_memory2_0_s1_translator:uav_readdata -> onchip_memory2_0_s1_agent:m0_readdata
 	wire          onchip_memory2_0_s1_agent_m0_waitrequest;                            // onchip_memory2_0_s1_translator:uav_waitrequest -> onchip_memory2_0_s1_agent:m0_waitrequest
 	wire          onchip_memory2_0_s1_agent_m0_debugaccess;                            // onchip_memory2_0_s1_agent:m0_debugaccess -> onchip_memory2_0_s1_translator:uav_debugaccess
@@ -93,28 +87,22 @@ module onchip_ram_256b_mm_interconnect_0 (
 	wire          onchip_memory2_0_s1_agent_rsp_fifo_out_ready;                        // onchip_memory2_0_s1_agent:rf_sink_ready -> onchip_memory2_0_s1_agent_rsp_fifo:out_ready
 	wire          onchip_memory2_0_s1_agent_rsp_fifo_out_startofpacket;                // onchip_memory2_0_s1_agent_rsp_fifo:out_startofpacket -> onchip_memory2_0_s1_agent:rf_sink_startofpacket
 	wire          onchip_memory2_0_s1_agent_rsp_fifo_out_endofpacket;                  // onchip_memory2_0_s1_agent_rsp_fifo:out_endofpacket -> onchip_memory2_0_s1_agent:rf_sink_endofpacket
-	wire          host_bridge_1_m0_agent_cp_valid;                                     // host_bridge_1_m0_agent:cp_valid -> router:sink_valid
-	wire  [351:0] host_bridge_1_m0_agent_cp_data;                                      // host_bridge_1_m0_agent:cp_data -> router:sink_data
-	wire          host_bridge_1_m0_agent_cp_ready;                                     // router:sink_ready -> host_bridge_1_m0_agent:cp_ready
-	wire          host_bridge_1_m0_agent_cp_startofpacket;                             // host_bridge_1_m0_agent:cp_startofpacket -> router:sink_startofpacket
-	wire          host_bridge_1_m0_agent_cp_endofpacket;                               // host_bridge_1_m0_agent:cp_endofpacket -> router:sink_endofpacket
+	wire          kernel_bridge_m0_agent_cp_valid;                                     // kernel_bridge_m0_agent:cp_valid -> router:sink_valid
+	wire  [351:0] kernel_bridge_m0_agent_cp_data;                                      // kernel_bridge_m0_agent:cp_data -> router:sink_data
+	wire          kernel_bridge_m0_agent_cp_ready;                                     // router:sink_ready -> kernel_bridge_m0_agent:cp_ready
+	wire          kernel_bridge_m0_agent_cp_startofpacket;                             // kernel_bridge_m0_agent:cp_startofpacket -> router:sink_startofpacket
+	wire          kernel_bridge_m0_agent_cp_endofpacket;                               // kernel_bridge_m0_agent:cp_endofpacket -> router:sink_endofpacket
 	wire          router_src_valid;                                                    // router:src_valid -> cmd_demux:sink_valid
 	wire  [351:0] router_src_data;                                                     // router:src_data -> cmd_demux:sink_data
 	wire          router_src_ready;                                                    // cmd_demux:sink_ready -> router:src_ready
 	wire    [1:0] router_src_channel;                                                  // router:src_channel -> cmd_demux:sink_channel
 	wire          router_src_startofpacket;                                            // router:src_startofpacket -> cmd_demux:sink_startofpacket
 	wire          router_src_endofpacket;                                              // router:src_endofpacket -> cmd_demux:sink_endofpacket
-	wire          kernel_bridge_m0_agent_cp_valid;                                     // kernel_bridge_m0_agent:cp_valid -> router_001:sink_valid
-	wire  [351:0] kernel_bridge_m0_agent_cp_data;                                      // kernel_bridge_m0_agent:cp_data -> router_001:sink_data
-	wire          kernel_bridge_m0_agent_cp_ready;                                     // router_001:sink_ready -> kernel_bridge_m0_agent:cp_ready
-	wire          kernel_bridge_m0_agent_cp_startofpacket;                             // kernel_bridge_m0_agent:cp_startofpacket -> router_001:sink_startofpacket
-	wire          kernel_bridge_m0_agent_cp_endofpacket;                               // kernel_bridge_m0_agent:cp_endofpacket -> router_001:sink_endofpacket
-	wire          router_001_src_valid;                                                // router_001:src_valid -> cmd_demux_001:sink_valid
-	wire  [351:0] router_001_src_data;                                                 // router_001:src_data -> cmd_demux_001:sink_data
-	wire          router_001_src_ready;                                                // cmd_demux_001:sink_ready -> router_001:src_ready
-	wire    [1:0] router_001_src_channel;                                              // router_001:src_channel -> cmd_demux_001:sink_channel
-	wire          router_001_src_startofpacket;                                        // router_001:src_startofpacket -> cmd_demux_001:sink_startofpacket
-	wire          router_001_src_endofpacket;                                          // router_001:src_endofpacket -> cmd_demux_001:sink_endofpacket
+	wire          host_bridge_1_m0_agent_cp_valid;                                     // host_bridge_1_m0_agent:cp_valid -> router_001:sink_valid
+	wire   [99:0] host_bridge_1_m0_agent_cp_data;                                      // host_bridge_1_m0_agent:cp_data -> router_001:sink_data
+	wire          host_bridge_1_m0_agent_cp_ready;                                     // router_001:sink_ready -> host_bridge_1_m0_agent:cp_ready
+	wire          host_bridge_1_m0_agent_cp_startofpacket;                             // host_bridge_1_m0_agent:cp_startofpacket -> router_001:sink_startofpacket
+	wire          host_bridge_1_m0_agent_cp_endofpacket;                               // host_bridge_1_m0_agent:cp_endofpacket -> router_001:sink_endofpacket
 	wire          onchip_memory2_0_s1_agent_rp_valid;                                  // onchip_memory2_0_s1_agent:rp_valid -> router_002:sink_valid
 	wire  [351:0] onchip_memory2_0_s1_agent_rp_data;                                   // onchip_memory2_0_s1_agent:rp_data -> router_002:sink_data
 	wire          onchip_memory2_0_s1_agent_rp_ready;                                  // router_002:sink_ready -> onchip_memory2_0_s1_agent:rp_ready
@@ -162,6 +150,30 @@ module onchip_ram_256b_mm_interconnect_0 (
 	wire    [1:0] rsp_demux_src1_channel;                                              // rsp_demux:src1_channel -> rsp_mux_001:sink0_channel
 	wire          rsp_demux_src1_startofpacket;                                        // rsp_demux:src1_startofpacket -> rsp_mux_001:sink0_startofpacket
 	wire          rsp_demux_src1_endofpacket;                                          // rsp_demux:src1_endofpacket -> rsp_mux_001:sink0_endofpacket
+	wire          rsp_mux_001_src_valid;                                               // rsp_mux_001:src_valid -> host_bridge_1_m0_rsp_width_adapter:in_valid
+	wire  [351:0] rsp_mux_001_src_data;                                                // rsp_mux_001:src_data -> host_bridge_1_m0_rsp_width_adapter:in_data
+	wire          rsp_mux_001_src_ready;                                               // host_bridge_1_m0_rsp_width_adapter:in_ready -> rsp_mux_001:src_ready
+	wire    [1:0] rsp_mux_001_src_channel;                                             // rsp_mux_001:src_channel -> host_bridge_1_m0_rsp_width_adapter:in_channel
+	wire          rsp_mux_001_src_startofpacket;                                       // rsp_mux_001:src_startofpacket -> host_bridge_1_m0_rsp_width_adapter:in_startofpacket
+	wire          rsp_mux_001_src_endofpacket;                                         // rsp_mux_001:src_endofpacket -> host_bridge_1_m0_rsp_width_adapter:in_endofpacket
+	wire          host_bridge_1_m0_rsp_width_adapter_src_valid;                        // host_bridge_1_m0_rsp_width_adapter:out_valid -> host_bridge_1_m0_agent:rp_valid
+	wire   [99:0] host_bridge_1_m0_rsp_width_adapter_src_data;                         // host_bridge_1_m0_rsp_width_adapter:out_data -> host_bridge_1_m0_agent:rp_data
+	wire          host_bridge_1_m0_rsp_width_adapter_src_ready;                        // host_bridge_1_m0_agent:rp_ready -> host_bridge_1_m0_rsp_width_adapter:out_ready
+	wire    [1:0] host_bridge_1_m0_rsp_width_adapter_src_channel;                      // host_bridge_1_m0_rsp_width_adapter:out_channel -> host_bridge_1_m0_agent:rp_channel
+	wire          host_bridge_1_m0_rsp_width_adapter_src_startofpacket;                // host_bridge_1_m0_rsp_width_adapter:out_startofpacket -> host_bridge_1_m0_agent:rp_startofpacket
+	wire          host_bridge_1_m0_rsp_width_adapter_src_endofpacket;                  // host_bridge_1_m0_rsp_width_adapter:out_endofpacket -> host_bridge_1_m0_agent:rp_endofpacket
+	wire          router_001_src_valid;                                                // router_001:src_valid -> host_bridge_1_m0_cmd_width_adapter:in_valid
+	wire   [99:0] router_001_src_data;                                                 // router_001:src_data -> host_bridge_1_m0_cmd_width_adapter:in_data
+	wire          router_001_src_ready;                                                // host_bridge_1_m0_cmd_width_adapter:in_ready -> router_001:src_ready
+	wire    [1:0] router_001_src_channel;                                              // router_001:src_channel -> host_bridge_1_m0_cmd_width_adapter:in_channel
+	wire          router_001_src_startofpacket;                                        // router_001:src_startofpacket -> host_bridge_1_m0_cmd_width_adapter:in_startofpacket
+	wire          router_001_src_endofpacket;                                          // router_001:src_endofpacket -> host_bridge_1_m0_cmd_width_adapter:in_endofpacket
+	wire          host_bridge_1_m0_cmd_width_adapter_src_valid;                        // host_bridge_1_m0_cmd_width_adapter:out_valid -> cmd_demux_001:sink_valid
+	wire  [351:0] host_bridge_1_m0_cmd_width_adapter_src_data;                         // host_bridge_1_m0_cmd_width_adapter:out_data -> cmd_demux_001:sink_data
+	wire          host_bridge_1_m0_cmd_width_adapter_src_ready;                        // cmd_demux_001:sink_ready -> host_bridge_1_m0_cmd_width_adapter:out_ready
+	wire    [1:0] host_bridge_1_m0_cmd_width_adapter_src_channel;                      // host_bridge_1_m0_cmd_width_adapter:out_channel -> cmd_demux_001:sink_channel
+	wire          host_bridge_1_m0_cmd_width_adapter_src_startofpacket;                // host_bridge_1_m0_cmd_width_adapter:out_startofpacket -> cmd_demux_001:sink_startofpacket
+	wire          host_bridge_1_m0_cmd_width_adapter_src_endofpacket;                  // host_bridge_1_m0_cmd_width_adapter:out_endofpacket -> cmd_demux_001:sink_endofpacket
 	wire          onchip_memory2_0_s1_agent_rdata_fifo_src_valid;                      // onchip_memory2_0_s1_agent:rdata_fifo_src_valid -> avalon_st_adapter:in_0_valid
 	wire  [257:0] onchip_memory2_0_s1_agent_rdata_fifo_src_data;                       // onchip_memory2_0_s1_agent:rdata_fifo_src_data -> avalon_st_adapter:in_0_data
 	wire          onchip_memory2_0_s1_agent_rdata_fifo_src_ready;                      // avalon_st_adapter:in_0_ready -> onchip_memory2_0_s1_agent:rdata_fifo_src_ready
@@ -169,66 +181,6 @@ module onchip_ram_256b_mm_interconnect_0 (
 	wire  [257:0] avalon_st_adapter_out_0_data;                                        // avalon_st_adapter:out_0_data -> onchip_memory2_0_s1_agent:rdata_fifo_sink_data
 	wire          avalon_st_adapter_out_0_ready;                                       // onchip_memory2_0_s1_agent:rdata_fifo_sink_ready -> avalon_st_adapter:out_0_ready
 	wire    [0:0] avalon_st_adapter_out_0_error;                                       // avalon_st_adapter:out_0_error -> onchip_memory2_0_s1_agent:rdata_fifo_sink_error
-
-	altera_merlin_master_translator #(
-		.AV_ADDRESS_W                (23),
-		.AV_DATA_W                   (256),
-		.AV_BURSTCOUNT_W             (1),
-		.AV_BYTEENABLE_W             (32),
-		.UAV_ADDRESS_W               (23),
-		.UAV_BURSTCOUNT_W            (6),
-		.USE_READ                    (1),
-		.USE_WRITE                   (1),
-		.USE_BEGINBURSTTRANSFER      (0),
-		.USE_BEGINTRANSFER           (0),
-		.USE_CHIPSELECT              (0),
-		.USE_BURSTCOUNT              (1),
-		.USE_READDATAVALID           (1),
-		.USE_WAITREQUEST             (1),
-		.USE_READRESPONSE            (0),
-		.USE_WRITERESPONSE           (0),
-		.AV_SYMBOLS_PER_WORD         (32),
-		.AV_ADDRESS_SYMBOLS          (1),
-		.AV_BURSTCOUNT_SYMBOLS       (0),
-		.AV_CONSTANT_BURST_BEHAVIOR  (0),
-		.UAV_CONSTANT_BURST_BEHAVIOR (0),
-		.AV_LINEWRAPBURSTS           (0),
-		.AV_REGISTERINCOMINGSIGNALS  (0)
-	) host_bridge_1_m0_translator (
-		.clk                    (clk_0_clk_clk),                                                       //                       clk.clk
-		.reset                  (host_bridge_1_reset_reset_bridge_in_reset_reset),                     //                     reset.reset
-		.uav_address            (host_bridge_1_m0_translator_avalon_universal_master_0_address),       // avalon_universal_master_0.address
-		.uav_burstcount         (host_bridge_1_m0_translator_avalon_universal_master_0_burstcount),    //                          .burstcount
-		.uav_read               (host_bridge_1_m0_translator_avalon_universal_master_0_read),          //                          .read
-		.uav_write              (host_bridge_1_m0_translator_avalon_universal_master_0_write),         //                          .write
-		.uav_waitrequest        (host_bridge_1_m0_translator_avalon_universal_master_0_waitrequest),   //                          .waitrequest
-		.uav_readdatavalid      (host_bridge_1_m0_translator_avalon_universal_master_0_readdatavalid), //                          .readdatavalid
-		.uav_byteenable         (host_bridge_1_m0_translator_avalon_universal_master_0_byteenable),    //                          .byteenable
-		.uav_readdata           (host_bridge_1_m0_translator_avalon_universal_master_0_readdata),      //                          .readdata
-		.uav_writedata          (host_bridge_1_m0_translator_avalon_universal_master_0_writedata),     //                          .writedata
-		.uav_lock               (host_bridge_1_m0_translator_avalon_universal_master_0_lock),          //                          .lock
-		.uav_debugaccess        (host_bridge_1_m0_translator_avalon_universal_master_0_debugaccess),   //                          .debugaccess
-		.av_address             (host_bridge_1_m0_address),                                            //      avalon_anti_master_0.address
-		.av_waitrequest         (host_bridge_1_m0_waitrequest),                                        //                          .waitrequest
-		.av_burstcount          (host_bridge_1_m0_burstcount),                                         //                          .burstcount
-		.av_byteenable          (host_bridge_1_m0_byteenable),                                         //                          .byteenable
-		.av_read                (host_bridge_1_m0_read),                                               //                          .read
-		.av_readdata            (host_bridge_1_m0_readdata),                                           //                          .readdata
-		.av_readdatavalid       (host_bridge_1_m0_readdatavalid),                                      //                          .readdatavalid
-		.av_write               (host_bridge_1_m0_write),                                              //                          .write
-		.av_writedata           (host_bridge_1_m0_writedata),                                          //                          .writedata
-		.av_debugaccess         (host_bridge_1_m0_debugaccess),                                        //                          .debugaccess
-		.av_beginbursttransfer  (1'b0),                                                                //               (terminated)
-		.av_begintransfer       (1'b0),                                                                //               (terminated)
-		.av_chipselect          (1'b0),                                                                //               (terminated)
-		.av_lock                (1'b0),                                                                //               (terminated)
-		.uav_clken              (),                                                                    //               (terminated)
-		.av_clken               (1'b1),                                                                //               (terminated)
-		.uav_response           (2'b00),                                                               //               (terminated)
-		.av_response            (),                                                                    //               (terminated)
-		.uav_writeresponsevalid (1'b0),                                                                //               (terminated)
-		.av_writeresponsevalid  ()                                                                     //               (terminated)
-	);
 
 	altera_merlin_master_translator #(
 		.AV_ADDRESS_W                (23),
@@ -256,7 +208,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.AV_REGISTERINCOMINGSIGNALS  (0)
 	) kernel_bridge_m0_translator (
 		.clk                    (clk_0_clk_clk),                                                       //                       clk.clk
-		.reset                  (host_bridge_1_reset_reset_bridge_in_reset_reset),                     //                     reset.reset
+		.reset                  (kernel_bridge_reset_reset_bridge_in_reset_reset),                     //                     reset.reset
 		.uav_address            (kernel_bridge_m0_translator_avalon_universal_master_0_address),       // avalon_universal_master_0.address
 		.uav_burstcount         (kernel_bridge_m0_translator_avalon_universal_master_0_burstcount),    //                          .burstcount
 		.uav_read               (kernel_bridge_m0_translator_avalon_universal_master_0_read),          //                          .read
@@ -278,6 +230,66 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.av_write               (kernel_bridge_m0_write),                                              //                          .write
 		.av_writedata           (kernel_bridge_m0_writedata),                                          //                          .writedata
 		.av_debugaccess         (kernel_bridge_m0_debugaccess),                                        //                          .debugaccess
+		.av_beginbursttransfer  (1'b0),                                                                //               (terminated)
+		.av_begintransfer       (1'b0),                                                                //               (terminated)
+		.av_chipselect          (1'b0),                                                                //               (terminated)
+		.av_lock                (1'b0),                                                                //               (terminated)
+		.uav_clken              (),                                                                    //               (terminated)
+		.av_clken               (1'b1),                                                                //               (terminated)
+		.uav_response           (2'b00),                                                               //               (terminated)
+		.av_response            (),                                                                    //               (terminated)
+		.uav_writeresponsevalid (1'b0),                                                                //               (terminated)
+		.av_writeresponsevalid  ()                                                                     //               (terminated)
+	);
+
+	altera_merlin_master_translator #(
+		.AV_ADDRESS_W                (23),
+		.AV_DATA_W                   (32),
+		.AV_BURSTCOUNT_W             (1),
+		.AV_BYTEENABLE_W             (4),
+		.UAV_ADDRESS_W               (23),
+		.UAV_BURSTCOUNT_W            (3),
+		.USE_READ                    (1),
+		.USE_WRITE                   (1),
+		.USE_BEGINBURSTTRANSFER      (0),
+		.USE_BEGINTRANSFER           (0),
+		.USE_CHIPSELECT              (0),
+		.USE_BURSTCOUNT              (1),
+		.USE_READDATAVALID           (1),
+		.USE_WAITREQUEST             (1),
+		.USE_READRESPONSE            (0),
+		.USE_WRITERESPONSE           (0),
+		.AV_SYMBOLS_PER_WORD         (4),
+		.AV_ADDRESS_SYMBOLS          (1),
+		.AV_BURSTCOUNT_SYMBOLS       (0),
+		.AV_CONSTANT_BURST_BEHAVIOR  (0),
+		.UAV_CONSTANT_BURST_BEHAVIOR (0),
+		.AV_LINEWRAPBURSTS           (0),
+		.AV_REGISTERINCOMINGSIGNALS  (0)
+	) host_bridge_1_m0_translator (
+		.clk                    (clk_0_clk_clk),                                                       //                       clk.clk
+		.reset                  (kernel_bridge_reset_reset_bridge_in_reset_reset),                     //                     reset.reset
+		.uav_address            (host_bridge_1_m0_translator_avalon_universal_master_0_address),       // avalon_universal_master_0.address
+		.uav_burstcount         (host_bridge_1_m0_translator_avalon_universal_master_0_burstcount),    //                          .burstcount
+		.uav_read               (host_bridge_1_m0_translator_avalon_universal_master_0_read),          //                          .read
+		.uav_write              (host_bridge_1_m0_translator_avalon_universal_master_0_write),         //                          .write
+		.uav_waitrequest        (host_bridge_1_m0_translator_avalon_universal_master_0_waitrequest),   //                          .waitrequest
+		.uav_readdatavalid      (host_bridge_1_m0_translator_avalon_universal_master_0_readdatavalid), //                          .readdatavalid
+		.uav_byteenable         (host_bridge_1_m0_translator_avalon_universal_master_0_byteenable),    //                          .byteenable
+		.uav_readdata           (host_bridge_1_m0_translator_avalon_universal_master_0_readdata),      //                          .readdata
+		.uav_writedata          (host_bridge_1_m0_translator_avalon_universal_master_0_writedata),     //                          .writedata
+		.uav_lock               (host_bridge_1_m0_translator_avalon_universal_master_0_lock),          //                          .lock
+		.uav_debugaccess        (host_bridge_1_m0_translator_avalon_universal_master_0_debugaccess),   //                          .debugaccess
+		.av_address             (host_bridge_1_m0_address),                                            //      avalon_anti_master_0.address
+		.av_waitrequest         (host_bridge_1_m0_waitrequest),                                        //                          .waitrequest
+		.av_burstcount          (host_bridge_1_m0_burstcount),                                         //                          .burstcount
+		.av_byteenable          (host_bridge_1_m0_byteenable),                                         //                          .byteenable
+		.av_read                (host_bridge_1_m0_read),                                               //                          .read
+		.av_readdata            (host_bridge_1_m0_readdata),                                           //                          .readdata
+		.av_readdatavalid       (host_bridge_1_m0_readdatavalid),                                      //                          .readdatavalid
+		.av_write               (host_bridge_1_m0_write),                                              //                          .write
+		.av_writedata           (host_bridge_1_m0_writedata),                                          //                          .writedata
+		.av_debugaccess         (host_bridge_1_m0_debugaccess),                                        //                          .debugaccess
 		.av_beginbursttransfer  (1'b0),                                                                //               (terminated)
 		.av_begintransfer       (1'b0),                                                                //               (terminated)
 		.av_chipselect          (1'b0),                                                                //               (terminated)
@@ -318,7 +330,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.AV_DATA_HOLD_CYCLES            (0)
 	) onchip_memory2_0_s1_translator (
 		.clk                    (clk_0_clk_clk),                                   //                      clk.clk
-		.reset                  (host_bridge_1_reset_reset_bridge_in_reset_reset), //                    reset.reset
+		.reset                  (kernel_bridge_reset_reset_bridge_in_reset_reset), //                    reset.reset
 		.uav_address            (onchip_memory2_0_s1_agent_m0_address),            // avalon_universal_slave_0.address
 		.uav_burstcount         (onchip_memory2_0_s1_agent_m0_burstcount),         //                         .burstcount
 		.uav_read               (onchip_memory2_0_s1_agent_m0_read),               //                         .read
@@ -398,87 +410,6 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.PKT_DEST_ID_L             (338),
 		.ST_DATA_W                 (352),
 		.ST_CHANNEL_W              (2),
-		.AV_BURSTCOUNT_W           (6),
-		.SUPPRESS_0_BYTEEN_RSP     (0),
-		.ID                        (0),
-		.BURSTWRAP_VALUE           (1),
-		.CACHE_VALUE               (0),
-		.SECURE_ACCESS_BIT         (1),
-		.USE_READRESPONSE          (0),
-		.USE_WRITERESPONSE         (0)
-	) host_bridge_1_m0_agent (
-		.clk                   (clk_0_clk_clk),                                                       //       clk.clk
-		.reset                 (host_bridge_1_reset_reset_bridge_in_reset_reset),                     // clk_reset.reset
-		.av_address            (host_bridge_1_m0_translator_avalon_universal_master_0_address),       //        av.address
-		.av_write              (host_bridge_1_m0_translator_avalon_universal_master_0_write),         //          .write
-		.av_read               (host_bridge_1_m0_translator_avalon_universal_master_0_read),          //          .read
-		.av_writedata          (host_bridge_1_m0_translator_avalon_universal_master_0_writedata),     //          .writedata
-		.av_readdata           (host_bridge_1_m0_translator_avalon_universal_master_0_readdata),      //          .readdata
-		.av_waitrequest        (host_bridge_1_m0_translator_avalon_universal_master_0_waitrequest),   //          .waitrequest
-		.av_readdatavalid      (host_bridge_1_m0_translator_avalon_universal_master_0_readdatavalid), //          .readdatavalid
-		.av_byteenable         (host_bridge_1_m0_translator_avalon_universal_master_0_byteenable),    //          .byteenable
-		.av_burstcount         (host_bridge_1_m0_translator_avalon_universal_master_0_burstcount),    //          .burstcount
-		.av_debugaccess        (host_bridge_1_m0_translator_avalon_universal_master_0_debugaccess),   //          .debugaccess
-		.av_lock               (host_bridge_1_m0_translator_avalon_universal_master_0_lock),          //          .lock
-		.cp_valid              (host_bridge_1_m0_agent_cp_valid),                                     //        cp.valid
-		.cp_data               (host_bridge_1_m0_agent_cp_data),                                      //          .data
-		.cp_startofpacket      (host_bridge_1_m0_agent_cp_startofpacket),                             //          .startofpacket
-		.cp_endofpacket        (host_bridge_1_m0_agent_cp_endofpacket),                               //          .endofpacket
-		.cp_ready              (host_bridge_1_m0_agent_cp_ready),                                     //          .ready
-		.rp_valid              (rsp_mux_src_valid),                                                   //        rp.valid
-		.rp_data               (rsp_mux_src_data),                                                    //          .data
-		.rp_channel            (rsp_mux_src_channel),                                                 //          .channel
-		.rp_startofpacket      (rsp_mux_src_startofpacket),                                           //          .startofpacket
-		.rp_endofpacket        (rsp_mux_src_endofpacket),                                             //          .endofpacket
-		.rp_ready              (rsp_mux_src_ready),                                                   //          .ready
-		.av_response           (),                                                                    // (terminated)
-		.av_writeresponsevalid ()                                                                     // (terminated)
-	);
-
-	altera_merlin_master_agent #(
-		.PKT_ORI_BURST_SIZE_H      (351),
-		.PKT_ORI_BURST_SIZE_L      (349),
-		.PKT_RESPONSE_STATUS_H     (348),
-		.PKT_RESPONSE_STATUS_L     (347),
-		.PKT_QOS_H                 (336),
-		.PKT_QOS_L                 (336),
-		.PKT_DATA_SIDEBAND_H       (334),
-		.PKT_DATA_SIDEBAND_L       (334),
-		.PKT_ADDR_SIDEBAND_H       (333),
-		.PKT_ADDR_SIDEBAND_L       (333),
-		.PKT_BURST_TYPE_H          (332),
-		.PKT_BURST_TYPE_L          (331),
-		.PKT_CACHE_H               (346),
-		.PKT_CACHE_L               (343),
-		.PKT_THREAD_ID_H           (339),
-		.PKT_THREAD_ID_L           (339),
-		.PKT_BURST_SIZE_H          (330),
-		.PKT_BURST_SIZE_L          (328),
-		.PKT_TRANS_EXCLUSIVE       (316),
-		.PKT_TRANS_LOCK            (315),
-		.PKT_BEGIN_BURST           (335),
-		.PKT_PROTECTION_H          (342),
-		.PKT_PROTECTION_L          (340),
-		.PKT_BURSTWRAP_H           (327),
-		.PKT_BURSTWRAP_L           (327),
-		.PKT_BYTE_CNT_H            (326),
-		.PKT_BYTE_CNT_L            (317),
-		.PKT_ADDR_H                (310),
-		.PKT_ADDR_L                (288),
-		.PKT_TRANS_COMPRESSED_READ (311),
-		.PKT_TRANS_POSTED          (312),
-		.PKT_TRANS_WRITE           (313),
-		.PKT_TRANS_READ            (314),
-		.PKT_DATA_H                (255),
-		.PKT_DATA_L                (0),
-		.PKT_BYTEEN_H              (287),
-		.PKT_BYTEEN_L              (256),
-		.PKT_SRC_ID_H              (337),
-		.PKT_SRC_ID_L              (337),
-		.PKT_DEST_ID_H             (338),
-		.PKT_DEST_ID_L             (338),
-		.ST_DATA_W                 (352),
-		.ST_CHANNEL_W              (2),
 		.AV_BURSTCOUNT_W           (10),
 		.SUPPRESS_0_BYTEEN_RSP     (0),
 		.ID                        (1),
@@ -489,7 +420,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.USE_WRITERESPONSE         (0)
 	) kernel_bridge_m0_agent (
 		.clk                   (clk_0_clk_clk),                                                       //       clk.clk
-		.reset                 (host_bridge_1_reset_reset_bridge_in_reset_reset),                     // clk_reset.reset
+		.reset                 (kernel_bridge_reset_reset_bridge_in_reset_reset),                     // clk_reset.reset
 		.av_address            (kernel_bridge_m0_translator_avalon_universal_master_0_address),       //        av.address
 		.av_write              (kernel_bridge_m0_translator_avalon_universal_master_0_write),         //          .write
 		.av_read               (kernel_bridge_m0_translator_avalon_universal_master_0_read),          //          .read
@@ -506,12 +437,93 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.cp_startofpacket      (kernel_bridge_m0_agent_cp_startofpacket),                             //          .startofpacket
 		.cp_endofpacket        (kernel_bridge_m0_agent_cp_endofpacket),                               //          .endofpacket
 		.cp_ready              (kernel_bridge_m0_agent_cp_ready),                                     //          .ready
-		.rp_valid              (rsp_mux_001_src_valid),                                               //        rp.valid
-		.rp_data               (rsp_mux_001_src_data),                                                //          .data
-		.rp_channel            (rsp_mux_001_src_channel),                                             //          .channel
-		.rp_startofpacket      (rsp_mux_001_src_startofpacket),                                       //          .startofpacket
-		.rp_endofpacket        (rsp_mux_001_src_endofpacket),                                         //          .endofpacket
-		.rp_ready              (rsp_mux_001_src_ready),                                               //          .ready
+		.rp_valid              (rsp_mux_src_valid),                                                   //        rp.valid
+		.rp_data               (rsp_mux_src_data),                                                    //          .data
+		.rp_channel            (rsp_mux_src_channel),                                                 //          .channel
+		.rp_startofpacket      (rsp_mux_src_startofpacket),                                           //          .startofpacket
+		.rp_endofpacket        (rsp_mux_src_endofpacket),                                             //          .endofpacket
+		.rp_ready              (rsp_mux_src_ready),                                                   //          .ready
+		.av_response           (),                                                                    // (terminated)
+		.av_writeresponsevalid ()                                                                     // (terminated)
+	);
+
+	altera_merlin_master_agent #(
+		.PKT_ORI_BURST_SIZE_H      (99),
+		.PKT_ORI_BURST_SIZE_L      (97),
+		.PKT_RESPONSE_STATUS_H     (96),
+		.PKT_RESPONSE_STATUS_L     (95),
+		.PKT_QOS_H                 (84),
+		.PKT_QOS_L                 (84),
+		.PKT_DATA_SIDEBAND_H       (82),
+		.PKT_DATA_SIDEBAND_L       (82),
+		.PKT_ADDR_SIDEBAND_H       (81),
+		.PKT_ADDR_SIDEBAND_L       (81),
+		.PKT_BURST_TYPE_H          (80),
+		.PKT_BURST_TYPE_L          (79),
+		.PKT_CACHE_H               (94),
+		.PKT_CACHE_L               (91),
+		.PKT_THREAD_ID_H           (87),
+		.PKT_THREAD_ID_L           (87),
+		.PKT_BURST_SIZE_H          (78),
+		.PKT_BURST_SIZE_L          (76),
+		.PKT_TRANS_EXCLUSIVE       (64),
+		.PKT_TRANS_LOCK            (63),
+		.PKT_BEGIN_BURST           (83),
+		.PKT_PROTECTION_H          (90),
+		.PKT_PROTECTION_L          (88),
+		.PKT_BURSTWRAP_H           (75),
+		.PKT_BURSTWRAP_L           (75),
+		.PKT_BYTE_CNT_H            (74),
+		.PKT_BYTE_CNT_L            (65),
+		.PKT_ADDR_H                (58),
+		.PKT_ADDR_L                (36),
+		.PKT_TRANS_COMPRESSED_READ (59),
+		.PKT_TRANS_POSTED          (60),
+		.PKT_TRANS_WRITE           (61),
+		.PKT_TRANS_READ            (62),
+		.PKT_DATA_H                (31),
+		.PKT_DATA_L                (0),
+		.PKT_BYTEEN_H              (35),
+		.PKT_BYTEEN_L              (32),
+		.PKT_SRC_ID_H              (85),
+		.PKT_SRC_ID_L              (85),
+		.PKT_DEST_ID_H             (86),
+		.PKT_DEST_ID_L             (86),
+		.ST_DATA_W                 (100),
+		.ST_CHANNEL_W              (2),
+		.AV_BURSTCOUNT_W           (3),
+		.SUPPRESS_0_BYTEEN_RSP     (1),
+		.ID                        (0),
+		.BURSTWRAP_VALUE           (1),
+		.CACHE_VALUE               (0),
+		.SECURE_ACCESS_BIT         (1),
+		.USE_READRESPONSE          (0),
+		.USE_WRITERESPONSE         (0)
+	) host_bridge_1_m0_agent (
+		.clk                   (clk_0_clk_clk),                                                       //       clk.clk
+		.reset                 (kernel_bridge_reset_reset_bridge_in_reset_reset),                     // clk_reset.reset
+		.av_address            (host_bridge_1_m0_translator_avalon_universal_master_0_address),       //        av.address
+		.av_write              (host_bridge_1_m0_translator_avalon_universal_master_0_write),         //          .write
+		.av_read               (host_bridge_1_m0_translator_avalon_universal_master_0_read),          //          .read
+		.av_writedata          (host_bridge_1_m0_translator_avalon_universal_master_0_writedata),     //          .writedata
+		.av_readdata           (host_bridge_1_m0_translator_avalon_universal_master_0_readdata),      //          .readdata
+		.av_waitrequest        (host_bridge_1_m0_translator_avalon_universal_master_0_waitrequest),   //          .waitrequest
+		.av_readdatavalid      (host_bridge_1_m0_translator_avalon_universal_master_0_readdatavalid), //          .readdatavalid
+		.av_byteenable         (host_bridge_1_m0_translator_avalon_universal_master_0_byteenable),    //          .byteenable
+		.av_burstcount         (host_bridge_1_m0_translator_avalon_universal_master_0_burstcount),    //          .burstcount
+		.av_debugaccess        (host_bridge_1_m0_translator_avalon_universal_master_0_debugaccess),   //          .debugaccess
+		.av_lock               (host_bridge_1_m0_translator_avalon_universal_master_0_lock),          //          .lock
+		.cp_valid              (host_bridge_1_m0_agent_cp_valid),                                     //        cp.valid
+		.cp_data               (host_bridge_1_m0_agent_cp_data),                                      //          .data
+		.cp_startofpacket      (host_bridge_1_m0_agent_cp_startofpacket),                             //          .startofpacket
+		.cp_endofpacket        (host_bridge_1_m0_agent_cp_endofpacket),                               //          .endofpacket
+		.cp_ready              (host_bridge_1_m0_agent_cp_ready),                                     //          .ready
+		.rp_valid              (host_bridge_1_m0_rsp_width_adapter_src_valid),                        //        rp.valid
+		.rp_data               (host_bridge_1_m0_rsp_width_adapter_src_data),                         //          .data
+		.rp_channel            (host_bridge_1_m0_rsp_width_adapter_src_channel),                      //          .channel
+		.rp_startofpacket      (host_bridge_1_m0_rsp_width_adapter_src_startofpacket),                //          .startofpacket
+		.rp_endofpacket        (host_bridge_1_m0_rsp_width_adapter_src_endofpacket),                  //          .endofpacket
+		.rp_ready              (host_bridge_1_m0_rsp_width_adapter_src_ready),                        //          .ready
 		.av_response           (),                                                                    // (terminated)
 		.av_writeresponsevalid ()                                                                     // (terminated)
 	);
@@ -556,7 +568,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.ECC_ENABLE                (0)
 	) onchip_memory2_0_s1_agent (
 		.clk                     (clk_0_clk_clk),                                           //             clk.clk
-		.reset                   (host_bridge_1_reset_reset_bridge_in_reset_reset),         //       clk_reset.reset
+		.reset                   (kernel_bridge_reset_reset_bridge_in_reset_reset),         //       clk_reset.reset
 		.m0_address              (onchip_memory2_0_s1_agent_m0_address),                    //              m0.address
 		.m0_burstcount           (onchip_memory2_0_s1_agent_m0_burstcount),                 //                .burstcount
 		.m0_byteenable           (onchip_memory2_0_s1_agent_m0_byteenable),                 //                .byteenable
@@ -615,7 +627,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.USE_ALMOST_EMPTY_IF (0)
 	) onchip_memory2_0_s1_agent_rsp_fifo (
 		.clk               (clk_0_clk_clk),                                        //       clk.clk
-		.reset             (host_bridge_1_reset_reset_bridge_in_reset_reset),      // clk_reset.reset
+		.reset             (kernel_bridge_reset_reset_bridge_in_reset_reset),      // clk_reset.reset
 		.in_data           (onchip_memory2_0_s1_agent_rf_source_data),             //        in.data
 		.in_valid          (onchip_memory2_0_s1_agent_rf_source_valid),            //          .valid
 		.in_ready          (onchip_memory2_0_s1_agent_rf_source_ready),            //          .ready
@@ -642,13 +654,13 @@ module onchip_ram_256b_mm_interconnect_0 (
 	);
 
 	onchip_ram_256b_mm_interconnect_0_router router (
-		.sink_ready         (host_bridge_1_m0_agent_cp_ready),                 //      sink.ready
-		.sink_valid         (host_bridge_1_m0_agent_cp_valid),                 //          .valid
-		.sink_data          (host_bridge_1_m0_agent_cp_data),                  //          .data
-		.sink_startofpacket (host_bridge_1_m0_agent_cp_startofpacket),         //          .startofpacket
-		.sink_endofpacket   (host_bridge_1_m0_agent_cp_endofpacket),           //          .endofpacket
+		.sink_ready         (kernel_bridge_m0_agent_cp_ready),                 //      sink.ready
+		.sink_valid         (kernel_bridge_m0_agent_cp_valid),                 //          .valid
+		.sink_data          (kernel_bridge_m0_agent_cp_data),                  //          .data
+		.sink_startofpacket (kernel_bridge_m0_agent_cp_startofpacket),         //          .startofpacket
+		.sink_endofpacket   (kernel_bridge_m0_agent_cp_endofpacket),           //          .endofpacket
 		.clk                (clk_0_clk_clk),                                   //       clk.clk
-		.reset              (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset              (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.src_ready          (router_src_ready),                                //       src.ready
 		.src_valid          (router_src_valid),                                //          .valid
 		.src_data           (router_src_data),                                 //          .data
@@ -657,14 +669,14 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.src_endofpacket    (router_src_endofpacket)                           //          .endofpacket
 	);
 
-	onchip_ram_256b_mm_interconnect_0_router router_001 (
-		.sink_ready         (kernel_bridge_m0_agent_cp_ready),                 //      sink.ready
-		.sink_valid         (kernel_bridge_m0_agent_cp_valid),                 //          .valid
-		.sink_data          (kernel_bridge_m0_agent_cp_data),                  //          .data
-		.sink_startofpacket (kernel_bridge_m0_agent_cp_startofpacket),         //          .startofpacket
-		.sink_endofpacket   (kernel_bridge_m0_agent_cp_endofpacket),           //          .endofpacket
+	onchip_ram_256b_mm_interconnect_0_router_001 router_001 (
+		.sink_ready         (host_bridge_1_m0_agent_cp_ready),                 //      sink.ready
+		.sink_valid         (host_bridge_1_m0_agent_cp_valid),                 //          .valid
+		.sink_data          (host_bridge_1_m0_agent_cp_data),                  //          .data
+		.sink_startofpacket (host_bridge_1_m0_agent_cp_startofpacket),         //          .startofpacket
+		.sink_endofpacket   (host_bridge_1_m0_agent_cp_endofpacket),           //          .endofpacket
 		.clk                (clk_0_clk_clk),                                   //       clk.clk
-		.reset              (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset              (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.src_ready          (router_001_src_ready),                            //       src.ready
 		.src_valid          (router_001_src_valid),                            //          .valid
 		.src_data           (router_001_src_data),                             //          .data
@@ -680,7 +692,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.sink_startofpacket (onchip_memory2_0_s1_agent_rp_startofpacket),      //          .startofpacket
 		.sink_endofpacket   (onchip_memory2_0_s1_agent_rp_endofpacket),        //          .endofpacket
 		.clk                (clk_0_clk_clk),                                   //       clk.clk
-		.reset              (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset              (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.src_ready          (router_002_src_ready),                            //       src.ready
 		.src_valid          (router_002_src_valid),                            //          .valid
 		.src_data           (router_002_src_data),                             //          .data
@@ -724,7 +736,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.ADAPTER_VERSION           ("13.1")
 	) onchip_memory2_0_s1_burst_adapter (
 		.clk                   (clk_0_clk_clk),                                           //       cr0.clk
-		.reset                 (host_bridge_1_reset_reset_bridge_in_reset_reset),         // cr0_reset.reset
+		.reset                 (kernel_bridge_reset_reset_bridge_in_reset_reset),         // cr0_reset.reset
 		.sink0_valid           (cmd_mux_src_valid),                                       //     sink0.valid
 		.sink0_data            (cmd_mux_src_data),                                        //          .data
 		.sink0_channel         (cmd_mux_src_channel),                                     //          .channel
@@ -741,7 +753,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 
 	onchip_ram_256b_mm_interconnect_0_cmd_demux cmd_demux (
 		.clk                (clk_0_clk_clk),                                   //       clk.clk
-		.reset              (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset              (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.sink_ready         (router_src_ready),                                //      sink.ready
 		.sink_channel       (router_src_channel),                              //          .channel
 		.sink_data          (router_src_data),                                 //          .data
@@ -757,25 +769,25 @@ module onchip_ram_256b_mm_interconnect_0 (
 	);
 
 	onchip_ram_256b_mm_interconnect_0_cmd_demux cmd_demux_001 (
-		.clk                (clk_0_clk_clk),                                   //       clk.clk
-		.reset              (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
-		.sink_ready         (router_001_src_ready),                            //      sink.ready
-		.sink_channel       (router_001_src_channel),                          //          .channel
-		.sink_data          (router_001_src_data),                             //          .data
-		.sink_startofpacket (router_001_src_startofpacket),                    //          .startofpacket
-		.sink_endofpacket   (router_001_src_endofpacket),                      //          .endofpacket
-		.sink_valid         (router_001_src_valid),                            //          .valid
-		.src0_ready         (cmd_demux_001_src0_ready),                        //      src0.ready
-		.src0_valid         (cmd_demux_001_src0_valid),                        //          .valid
-		.src0_data          (cmd_demux_001_src0_data),                         //          .data
-		.src0_channel       (cmd_demux_001_src0_channel),                      //          .channel
-		.src0_startofpacket (cmd_demux_001_src0_startofpacket),                //          .startofpacket
-		.src0_endofpacket   (cmd_demux_001_src0_endofpacket)                   //          .endofpacket
+		.clk                (clk_0_clk_clk),                                        //       clk.clk
+		.reset              (kernel_bridge_reset_reset_bridge_in_reset_reset),      // clk_reset.reset
+		.sink_ready         (host_bridge_1_m0_cmd_width_adapter_src_ready),         //      sink.ready
+		.sink_channel       (host_bridge_1_m0_cmd_width_adapter_src_channel),       //          .channel
+		.sink_data          (host_bridge_1_m0_cmd_width_adapter_src_data),          //          .data
+		.sink_startofpacket (host_bridge_1_m0_cmd_width_adapter_src_startofpacket), //          .startofpacket
+		.sink_endofpacket   (host_bridge_1_m0_cmd_width_adapter_src_endofpacket),   //          .endofpacket
+		.sink_valid         (host_bridge_1_m0_cmd_width_adapter_src_valid),         //          .valid
+		.src0_ready         (cmd_demux_001_src0_ready),                             //      src0.ready
+		.src0_valid         (cmd_demux_001_src0_valid),                             //          .valid
+		.src0_data          (cmd_demux_001_src0_data),                              //          .data
+		.src0_channel       (cmd_demux_001_src0_channel),                           //          .channel
+		.src0_startofpacket (cmd_demux_001_src0_startofpacket),                     //          .startofpacket
+		.src0_endofpacket   (cmd_demux_001_src0_endofpacket)                        //          .endofpacket
 	);
 
 	onchip_ram_256b_mm_interconnect_0_cmd_mux cmd_mux (
 		.clk                 (clk_0_clk_clk),                                   //       clk.clk
-		.reset               (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset               (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.src_ready           (cmd_mux_src_ready),                               //       src.ready
 		.src_valid           (cmd_mux_src_valid),                               //          .valid
 		.src_data            (cmd_mux_src_data),                                //          .data
@@ -798,7 +810,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 
 	onchip_ram_256b_mm_interconnect_0_rsp_demux rsp_demux (
 		.clk                (clk_0_clk_clk),                                   //       clk.clk
-		.reset              (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset              (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.sink_ready         (router_002_src_ready),                            //      sink.ready
 		.sink_channel       (router_002_src_channel),                          //          .channel
 		.sink_data          (router_002_src_data),                             //          .data
@@ -821,7 +833,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 
 	onchip_ram_256b_mm_interconnect_0_rsp_mux rsp_mux (
 		.clk                 (clk_0_clk_clk),                                   //       clk.clk
-		.reset               (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset               (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.src_ready           (rsp_mux_src_ready),                               //       src.ready
 		.src_valid           (rsp_mux_src_valid),                               //          .valid
 		.src_data            (rsp_mux_src_data),                                //          .data
@@ -838,7 +850,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 
 	onchip_ram_256b_mm_interconnect_0_rsp_mux rsp_mux_001 (
 		.clk                 (clk_0_clk_clk),                                   //       clk.clk
-		.reset               (host_bridge_1_reset_reset_bridge_in_reset_reset), // clk_reset.reset
+		.reset               (kernel_bridge_reset_reset_bridge_in_reset_reset), // clk_reset.reset
 		.src_ready           (rsp_mux_001_src_ready),                           //       src.ready
 		.src_valid           (rsp_mux_001_src_valid),                           //          .valid
 		.src_data            (rsp_mux_001_src_data),                            //          .data
@@ -851,6 +863,138 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.sink0_data          (rsp_demux_src1_data),                             //          .data
 		.sink0_startofpacket (rsp_demux_src1_startofpacket),                    //          .startofpacket
 		.sink0_endofpacket   (rsp_demux_src1_endofpacket)                       //          .endofpacket
+	);
+
+	altera_merlin_width_adapter #(
+		.IN_PKT_ADDR_H                 (310),
+		.IN_PKT_ADDR_L                 (288),
+		.IN_PKT_DATA_H                 (255),
+		.IN_PKT_DATA_L                 (0),
+		.IN_PKT_BYTEEN_H               (287),
+		.IN_PKT_BYTEEN_L               (256),
+		.IN_PKT_BYTE_CNT_H             (326),
+		.IN_PKT_BYTE_CNT_L             (317),
+		.IN_PKT_TRANS_COMPRESSED_READ  (311),
+		.IN_PKT_TRANS_WRITE            (313),
+		.IN_PKT_BURSTWRAP_H            (327),
+		.IN_PKT_BURSTWRAP_L            (327),
+		.IN_PKT_BURST_SIZE_H           (330),
+		.IN_PKT_BURST_SIZE_L           (328),
+		.IN_PKT_RESPONSE_STATUS_H      (348),
+		.IN_PKT_RESPONSE_STATUS_L      (347),
+		.IN_PKT_TRANS_EXCLUSIVE        (316),
+		.IN_PKT_BURST_TYPE_H           (332),
+		.IN_PKT_BURST_TYPE_L           (331),
+		.IN_PKT_ORI_BURST_SIZE_L       (349),
+		.IN_PKT_ORI_BURST_SIZE_H       (351),
+		.IN_ST_DATA_W                  (352),
+		.OUT_PKT_ADDR_H                (58),
+		.OUT_PKT_ADDR_L                (36),
+		.OUT_PKT_DATA_H                (31),
+		.OUT_PKT_DATA_L                (0),
+		.OUT_PKT_BYTEEN_H              (35),
+		.OUT_PKT_BYTEEN_L              (32),
+		.OUT_PKT_BYTE_CNT_H            (74),
+		.OUT_PKT_BYTE_CNT_L            (65),
+		.OUT_PKT_TRANS_COMPRESSED_READ (59),
+		.OUT_PKT_BURST_SIZE_H          (78),
+		.OUT_PKT_BURST_SIZE_L          (76),
+		.OUT_PKT_RESPONSE_STATUS_H     (96),
+		.OUT_PKT_RESPONSE_STATUS_L     (95),
+		.OUT_PKT_TRANS_EXCLUSIVE       (64),
+		.OUT_PKT_BURST_TYPE_H          (80),
+		.OUT_PKT_BURST_TYPE_L          (79),
+		.OUT_PKT_ORI_BURST_SIZE_L      (97),
+		.OUT_PKT_ORI_BURST_SIZE_H      (99),
+		.OUT_ST_DATA_W                 (100),
+		.ST_CHANNEL_W                  (2),
+		.OPTIMIZE_FOR_RSP              (1),
+		.RESPONSE_PATH                 (1),
+		.CONSTANT_BURST_SIZE           (1),
+		.PACKING                       (1),
+		.ENABLE_ADDRESS_ALIGNMENT      (0)
+	) host_bridge_1_m0_rsp_width_adapter (
+		.clk                  (clk_0_clk_clk),                                        //       clk.clk
+		.reset                (kernel_bridge_reset_reset_bridge_in_reset_reset),      // clk_reset.reset
+		.in_valid             (rsp_mux_001_src_valid),                                //      sink.valid
+		.in_channel           (rsp_mux_001_src_channel),                              //          .channel
+		.in_startofpacket     (rsp_mux_001_src_startofpacket),                        //          .startofpacket
+		.in_endofpacket       (rsp_mux_001_src_endofpacket),                          //          .endofpacket
+		.in_ready             (rsp_mux_001_src_ready),                                //          .ready
+		.in_data              (rsp_mux_001_src_data),                                 //          .data
+		.out_endofpacket      (host_bridge_1_m0_rsp_width_adapter_src_endofpacket),   //       src.endofpacket
+		.out_data             (host_bridge_1_m0_rsp_width_adapter_src_data),          //          .data
+		.out_channel          (host_bridge_1_m0_rsp_width_adapter_src_channel),       //          .channel
+		.out_valid            (host_bridge_1_m0_rsp_width_adapter_src_valid),         //          .valid
+		.out_ready            (host_bridge_1_m0_rsp_width_adapter_src_ready),         //          .ready
+		.out_startofpacket    (host_bridge_1_m0_rsp_width_adapter_src_startofpacket), //          .startofpacket
+		.in_command_size_data (3'b000)                                                // (terminated)
+	);
+
+	altera_merlin_width_adapter #(
+		.IN_PKT_ADDR_H                 (58),
+		.IN_PKT_ADDR_L                 (36),
+		.IN_PKT_DATA_H                 (31),
+		.IN_PKT_DATA_L                 (0),
+		.IN_PKT_BYTEEN_H               (35),
+		.IN_PKT_BYTEEN_L               (32),
+		.IN_PKT_BYTE_CNT_H             (74),
+		.IN_PKT_BYTE_CNT_L             (65),
+		.IN_PKT_TRANS_COMPRESSED_READ  (59),
+		.IN_PKT_TRANS_WRITE            (61),
+		.IN_PKT_BURSTWRAP_H            (75),
+		.IN_PKT_BURSTWRAP_L            (75),
+		.IN_PKT_BURST_SIZE_H           (78),
+		.IN_PKT_BURST_SIZE_L           (76),
+		.IN_PKT_RESPONSE_STATUS_H      (96),
+		.IN_PKT_RESPONSE_STATUS_L      (95),
+		.IN_PKT_TRANS_EXCLUSIVE        (64),
+		.IN_PKT_BURST_TYPE_H           (80),
+		.IN_PKT_BURST_TYPE_L           (79),
+		.IN_PKT_ORI_BURST_SIZE_L       (97),
+		.IN_PKT_ORI_BURST_SIZE_H       (99),
+		.IN_ST_DATA_W                  (100),
+		.OUT_PKT_ADDR_H                (310),
+		.OUT_PKT_ADDR_L                (288),
+		.OUT_PKT_DATA_H                (255),
+		.OUT_PKT_DATA_L                (0),
+		.OUT_PKT_BYTEEN_H              (287),
+		.OUT_PKT_BYTEEN_L              (256),
+		.OUT_PKT_BYTE_CNT_H            (326),
+		.OUT_PKT_BYTE_CNT_L            (317),
+		.OUT_PKT_TRANS_COMPRESSED_READ (311),
+		.OUT_PKT_BURST_SIZE_H          (330),
+		.OUT_PKT_BURST_SIZE_L          (328),
+		.OUT_PKT_RESPONSE_STATUS_H     (348),
+		.OUT_PKT_RESPONSE_STATUS_L     (347),
+		.OUT_PKT_TRANS_EXCLUSIVE       (316),
+		.OUT_PKT_BURST_TYPE_H          (332),
+		.OUT_PKT_BURST_TYPE_L          (331),
+		.OUT_PKT_ORI_BURST_SIZE_L      (349),
+		.OUT_PKT_ORI_BURST_SIZE_H      (351),
+		.OUT_ST_DATA_W                 (352),
+		.ST_CHANNEL_W                  (2),
+		.OPTIMIZE_FOR_RSP              (0),
+		.RESPONSE_PATH                 (0),
+		.CONSTANT_BURST_SIZE           (1),
+		.PACKING                       (1),
+		.ENABLE_ADDRESS_ALIGNMENT      (0)
+	) host_bridge_1_m0_cmd_width_adapter (
+		.clk                  (clk_0_clk_clk),                                        //       clk.clk
+		.reset                (kernel_bridge_reset_reset_bridge_in_reset_reset),      // clk_reset.reset
+		.in_valid             (router_001_src_valid),                                 //      sink.valid
+		.in_channel           (router_001_src_channel),                               //          .channel
+		.in_startofpacket     (router_001_src_startofpacket),                         //          .startofpacket
+		.in_endofpacket       (router_001_src_endofpacket),                           //          .endofpacket
+		.in_ready             (router_001_src_ready),                                 //          .ready
+		.in_data              (router_001_src_data),                                  //          .data
+		.out_endofpacket      (host_bridge_1_m0_cmd_width_adapter_src_endofpacket),   //       src.endofpacket
+		.out_data             (host_bridge_1_m0_cmd_width_adapter_src_data),          //          .data
+		.out_channel          (host_bridge_1_m0_cmd_width_adapter_src_channel),       //          .channel
+		.out_valid            (host_bridge_1_m0_cmd_width_adapter_src_valid),         //          .valid
+		.out_ready            (host_bridge_1_m0_cmd_width_adapter_src_ready),         //          .ready
+		.out_startofpacket    (host_bridge_1_m0_cmd_width_adapter_src_startofpacket), //          .startofpacket
+		.in_command_size_data (3'b000)                                                // (terminated)
 	);
 
 	onchip_ram_256b_mm_interconnect_0_avalon_st_adapter #(
@@ -872,7 +1016,7 @@ module onchip_ram_256b_mm_interconnect_0 (
 		.outReadyLatency (0)
 	) avalon_st_adapter (
 		.in_clk_0_clk   (clk_0_clk_clk),                                   // in_clk_0.clk
-		.in_rst_0_reset (host_bridge_1_reset_reset_bridge_in_reset_reset), // in_rst_0.reset
+		.in_rst_0_reset (kernel_bridge_reset_reset_bridge_in_reset_reset), // in_rst_0.reset
 		.in_0_data      (onchip_memory2_0_s1_agent_rdata_fifo_src_data),   //     in_0.data
 		.in_0_valid     (onchip_memory2_0_s1_agent_rdata_fifo_src_valid),  //         .valid
 		.in_0_ready     (onchip_memory2_0_s1_agent_rdata_fifo_src_ready),  //         .ready

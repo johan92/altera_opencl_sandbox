@@ -5,16 +5,16 @@
 `timescale 1 ps / 1 ps
 module onchip_ram_256b (
 		input  wire         clk_clk,                        //              clk.clk
-		output wire         host_bridge_1_s0_waitrequest,   // host_bridge_1_s0.waitrequest
-		output wire [255:0] host_bridge_1_s0_readdata,      //                 .readdata
-		output wire         host_bridge_1_s0_readdatavalid, //                 .readdatavalid
-		input  wire [0:0]   host_bridge_1_s0_burstcount,    //                 .burstcount
-		input  wire [255:0] host_bridge_1_s0_writedata,     //                 .writedata
-		input  wire [22:0]  host_bridge_1_s0_address,       //                 .address
-		input  wire         host_bridge_1_s0_write,         //                 .write
-		input  wire         host_bridge_1_s0_read,          //                 .read
-		input  wire [31:0]  host_bridge_1_s0_byteenable,    //                 .byteenable
-		input  wire         host_bridge_1_s0_debugaccess,   //                 .debugaccess
+		output wire         host_bridge_s0_waitrequest,     //   host_bridge_s0.waitrequest
+		output wire [31:0]  host_bridge_s0_readdata,        //                 .readdata
+		output wire         host_bridge_s0_readdatavalid,   //                 .readdatavalid
+		input  wire [0:0]   host_bridge_s0_burstcount,      //                 .burstcount
+		input  wire [31:0]  host_bridge_s0_writedata,       //                 .writedata
+		input  wire [22:0]  host_bridge_s0_address,         //                 .address
+		input  wire         host_bridge_s0_write,           //                 .write
+		input  wire         host_bridge_s0_read,            //                 .read
+		input  wire [3:0]   host_bridge_s0_byteenable,      //                 .byteenable
+		input  wire         host_bridge_s0_debugaccess,     //                 .debugaccess
 		output wire         kernel_bridge_s0_waitrequest,   // kernel_bridge_s0.waitrequest
 		output wire [255:0] kernel_bridge_s0_readdata,      //                 .readdata
 		output wire         kernel_bridge_s0_readdatavalid, //                 .readdatavalid
@@ -28,16 +28,6 @@ module onchip_ram_256b (
 		input  wire         reset_reset_n                   //            reset.reset_n
 	);
 
-	wire          host_bridge_1_m0_waitrequest;                     // mm_interconnect_0:host_bridge_1_m0_waitrequest -> host_bridge_1:m0_waitrequest
-	wire  [255:0] host_bridge_1_m0_readdata;                        // mm_interconnect_0:host_bridge_1_m0_readdata -> host_bridge_1:m0_readdata
-	wire          host_bridge_1_m0_debugaccess;                     // host_bridge_1:m0_debugaccess -> mm_interconnect_0:host_bridge_1_m0_debugaccess
-	wire   [22:0] host_bridge_1_m0_address;                         // host_bridge_1:m0_address -> mm_interconnect_0:host_bridge_1_m0_address
-	wire          host_bridge_1_m0_read;                            // host_bridge_1:m0_read -> mm_interconnect_0:host_bridge_1_m0_read
-	wire   [31:0] host_bridge_1_m0_byteenable;                      // host_bridge_1:m0_byteenable -> mm_interconnect_0:host_bridge_1_m0_byteenable
-	wire          host_bridge_1_m0_readdatavalid;                   // mm_interconnect_0:host_bridge_1_m0_readdatavalid -> host_bridge_1:m0_readdatavalid
-	wire  [255:0] host_bridge_1_m0_writedata;                       // host_bridge_1:m0_writedata -> mm_interconnect_0:host_bridge_1_m0_writedata
-	wire          host_bridge_1_m0_write;                           // host_bridge_1:m0_write -> mm_interconnect_0:host_bridge_1_m0_write
-	wire    [0:0] host_bridge_1_m0_burstcount;                      // host_bridge_1:m0_burstcount -> mm_interconnect_0:host_bridge_1_m0_burstcount
 	wire          kernel_bridge_m0_waitrequest;                     // mm_interconnect_0:kernel_bridge_m0_waitrequest -> kernel_bridge:m0_waitrequest
 	wire  [255:0] kernel_bridge_m0_readdata;                        // mm_interconnect_0:kernel_bridge_m0_readdata -> kernel_bridge:m0_readdata
 	wire          kernel_bridge_m0_debugaccess;                     // kernel_bridge:m0_debugaccess -> mm_interconnect_0:kernel_bridge_m0_debugaccess
@@ -48,6 +38,16 @@ module onchip_ram_256b (
 	wire  [255:0] kernel_bridge_m0_writedata;                       // kernel_bridge:m0_writedata -> mm_interconnect_0:kernel_bridge_m0_writedata
 	wire          kernel_bridge_m0_write;                           // kernel_bridge:m0_write -> mm_interconnect_0:kernel_bridge_m0_write
 	wire    [4:0] kernel_bridge_m0_burstcount;                      // kernel_bridge:m0_burstcount -> mm_interconnect_0:kernel_bridge_m0_burstcount
+	wire          host_bridge_1_m0_waitrequest;                     // mm_interconnect_0:host_bridge_1_m0_waitrequest -> host_bridge_1:m0_waitrequest
+	wire   [31:0] host_bridge_1_m0_readdata;                        // mm_interconnect_0:host_bridge_1_m0_readdata -> host_bridge_1:m0_readdata
+	wire          host_bridge_1_m0_debugaccess;                     // host_bridge_1:m0_debugaccess -> mm_interconnect_0:host_bridge_1_m0_debugaccess
+	wire   [22:0] host_bridge_1_m0_address;                         // host_bridge_1:m0_address -> mm_interconnect_0:host_bridge_1_m0_address
+	wire          host_bridge_1_m0_read;                            // host_bridge_1:m0_read -> mm_interconnect_0:host_bridge_1_m0_read
+	wire    [3:0] host_bridge_1_m0_byteenable;                      // host_bridge_1:m0_byteenable -> mm_interconnect_0:host_bridge_1_m0_byteenable
+	wire          host_bridge_1_m0_readdatavalid;                   // mm_interconnect_0:host_bridge_1_m0_readdatavalid -> host_bridge_1:m0_readdatavalid
+	wire   [31:0] host_bridge_1_m0_writedata;                       // host_bridge_1:m0_writedata -> mm_interconnect_0:host_bridge_1_m0_writedata
+	wire          host_bridge_1_m0_write;                           // host_bridge_1:m0_write -> mm_interconnect_0:host_bridge_1_m0_write
+	wire    [0:0] host_bridge_1_m0_burstcount;                      // host_bridge_1:m0_burstcount -> mm_interconnect_0:host_bridge_1_m0_burstcount
 	wire          mm_interconnect_0_onchip_memory2_0_s1_chipselect; // mm_interconnect_0:onchip_memory2_0_s1_chipselect -> onchip_memory2_0:chipselect
 	wire  [255:0] mm_interconnect_0_onchip_memory2_0_s1_readdata;   // onchip_memory2_0:readdata -> mm_interconnect_0:onchip_memory2_0_s1_readdata
 	wire   [17:0] mm_interconnect_0_onchip_memory2_0_s1_address;    // mm_interconnect_0:onchip_memory2_0_s1_address -> onchip_memory2_0:address
@@ -55,10 +55,10 @@ module onchip_ram_256b (
 	wire          mm_interconnect_0_onchip_memory2_0_s1_write;      // mm_interconnect_0:onchip_memory2_0_s1_write -> onchip_memory2_0:write
 	wire  [255:0] mm_interconnect_0_onchip_memory2_0_s1_writedata;  // mm_interconnect_0:onchip_memory2_0_s1_writedata -> onchip_memory2_0:writedata
 	wire          mm_interconnect_0_onchip_memory2_0_s1_clken;      // mm_interconnect_0:onchip_memory2_0_s1_clken -> onchip_memory2_0:clken
-	wire          rst_controller_reset_out_reset;                   // rst_controller:reset_out -> [host_bridge_1:reset, kernel_bridge:reset, mm_interconnect_0:host_bridge_1_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset]
+	wire          rst_controller_reset_out_reset;                   // rst_controller:reset_out -> [host_bridge_1:reset, kernel_bridge:reset, mm_interconnect_0:kernel_bridge_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset]
 
 	altera_avalon_mm_bridge #(
-		.DATA_WIDTH        (256),
+		.DATA_WIDTH        (32),
 		.SYMBOL_WIDTH      (8),
 		.HDL_ADDR_WIDTH    (23),
 		.BURSTCOUNT_WIDTH  (1),
@@ -67,16 +67,16 @@ module onchip_ram_256b (
 	) host_bridge_1 (
 		.clk              (clk_clk),                        //   clk.clk
 		.reset            (rst_controller_reset_out_reset), // reset.reset
-		.s0_waitrequest   (host_bridge_1_s0_waitrequest),   //    s0.waitrequest
-		.s0_readdata      (host_bridge_1_s0_readdata),      //      .readdata
-		.s0_readdatavalid (host_bridge_1_s0_readdatavalid), //      .readdatavalid
-		.s0_burstcount    (host_bridge_1_s0_burstcount),    //      .burstcount
-		.s0_writedata     (host_bridge_1_s0_writedata),     //      .writedata
-		.s0_address       (host_bridge_1_s0_address),       //      .address
-		.s0_write         (host_bridge_1_s0_write),         //      .write
-		.s0_read          (host_bridge_1_s0_read),          //      .read
-		.s0_byteenable    (host_bridge_1_s0_byteenable),    //      .byteenable
-		.s0_debugaccess   (host_bridge_1_s0_debugaccess),   //      .debugaccess
+		.s0_waitrequest   (host_bridge_s0_waitrequest),     //    s0.waitrequest
+		.s0_readdata      (host_bridge_s0_readdata),        //      .readdata
+		.s0_readdatavalid (host_bridge_s0_readdatavalid),   //      .readdatavalid
+		.s0_burstcount    (host_bridge_s0_burstcount),      //      .burstcount
+		.s0_writedata     (host_bridge_s0_writedata),       //      .writedata
+		.s0_address       (host_bridge_s0_address),         //      .address
+		.s0_write         (host_bridge_s0_write),           //      .write
+		.s0_read          (host_bridge_s0_read),            //      .read
+		.s0_byteenable    (host_bridge_s0_byteenable),      //      .byteenable
+		.s0_debugaccess   (host_bridge_s0_debugaccess),     //      .debugaccess
 		.m0_waitrequest   (host_bridge_1_m0_waitrequest),   //    m0.waitrequest
 		.m0_readdata      (host_bridge_1_m0_readdata),      //      .readdata
 		.m0_readdatavalid (host_bridge_1_m0_readdatavalid), //      .readdatavalid
@@ -140,7 +140,7 @@ module onchip_ram_256b (
 
 	onchip_ram_256b_mm_interconnect_0 mm_interconnect_0 (
 		.clk_0_clk_clk                                   (clk_clk),                                          //                                 clk_0_clk.clk
-		.host_bridge_1_reset_reset_bridge_in_reset_reset (rst_controller_reset_out_reset),                   // host_bridge_1_reset_reset_bridge_in_reset.reset
+		.kernel_bridge_reset_reset_bridge_in_reset_reset (rst_controller_reset_out_reset),                   // kernel_bridge_reset_reset_bridge_in_reset.reset
 		.host_bridge_1_m0_address                        (host_bridge_1_m0_address),                         //                          host_bridge_1_m0.address
 		.host_bridge_1_m0_waitrequest                    (host_bridge_1_m0_waitrequest),                     //                                          .waitrequest
 		.host_bridge_1_m0_burstcount                     (host_bridge_1_m0_burstcount),                      //                                          .burstcount

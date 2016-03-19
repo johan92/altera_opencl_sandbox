@@ -42,21 +42,21 @@
 
 `timescale 1 ns / 1 ns
 
-module onchip_ram_256b_mm_interconnect_0_router_002_default_decode
+module onchip_ram_256b_mm_interconnect_0_router_001_default_decode
   #(
      parameter DEFAULT_CHANNEL = 0,
                DEFAULT_WR_CHANNEL = -1,
                DEFAULT_RD_CHANNEL = -1,
-               DEFAULT_DESTID = 1 
+               DEFAULT_DESTID = 0 
    )
-  (output [338 - 338 : 0] default_destination_id,
+  (output [86 - 86 : 0] default_destination_id,
    output [2-1 : 0] default_wr_channel,
    output [2-1 : 0] default_rd_channel,
    output [2-1 : 0] default_src_channel
   );
 
   assign default_destination_id = 
-    DEFAULT_DESTID[338 - 338 : 0];
+    DEFAULT_DESTID[86 - 86 : 0];
 
   generate
     if (DEFAULT_CHANNEL == -1) begin : no_default_channel_assignment
@@ -81,7 +81,7 @@ module onchip_ram_256b_mm_interconnect_0_router_002_default_decode
 endmodule
 
 
-module onchip_ram_256b_mm_interconnect_0_router_002
+module onchip_ram_256b_mm_interconnect_0_router_001
 (
     // -------------------
     // Clock & Reset
@@ -93,7 +93,7 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     // Command Sink (Input)
     // -------------------
     input                       sink_valid,
-    input  [352-1 : 0]    sink_data,
+    input  [100-1 : 0]    sink_data,
     input                       sink_startofpacket,
     input                       sink_endofpacket,
     output                      sink_ready,
@@ -102,7 +102,7 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     // Command Source (Output)
     // -------------------
     output                          src_valid,
-    output reg [352-1    : 0] src_data,
+    output reg [100-1    : 0] src_data,
     output reg [2-1 : 0] src_channel,
     output                          src_startofpacket,
     output                          src_endofpacket,
@@ -112,18 +112,18 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     // -------------------------------------------------------
     // Local parameters and variables
     // -------------------------------------------------------
-    localparam PKT_ADDR_H = 310;
-    localparam PKT_ADDR_L = 288;
-    localparam PKT_DEST_ID_H = 338;
-    localparam PKT_DEST_ID_L = 338;
-    localparam PKT_PROTECTION_H = 342;
-    localparam PKT_PROTECTION_L = 340;
-    localparam ST_DATA_W = 352;
+    localparam PKT_ADDR_H = 58;
+    localparam PKT_ADDR_L = 36;
+    localparam PKT_DEST_ID_H = 86;
+    localparam PKT_DEST_ID_L = 86;
+    localparam PKT_PROTECTION_H = 90;
+    localparam PKT_PROTECTION_L = 88;
+    localparam ST_DATA_W = 100;
     localparam ST_CHANNEL_W = 2;
-    localparam DECODER_TYPE = 1;
+    localparam DECODER_TYPE = 0;
 
-    localparam PKT_TRANS_WRITE = 313;
-    localparam PKT_TRANS_READ  = 314;
+    localparam PKT_TRANS_WRITE = 61;
+    localparam PKT_TRANS_READ  = 62;
 
     localparam PKT_ADDR_W = PKT_ADDR_H-PKT_ADDR_L + 1;
     localparam PKT_DEST_ID_W = PKT_DEST_ID_H-PKT_DEST_ID_L + 1;
@@ -134,12 +134,13 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     // Figure out the number of bits to mask off for each slave span
     // during address decoding
     // -------------------------------------------------------
+    localparam PAD0 = log2ceil(64'h800000 - 64'h0); 
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
     // address range of the slaves. If the required width is too
     // large or too small, we use the address field width instead.
     // -------------------------------------------------------
-    localparam ADDR_RANGE = 64'h0;
+    localparam ADDR_RANGE = 64'h800000;
     localparam RANGE_ADDR_WIDTH = log2ceil(ADDR_RANGE);
     localparam OPTIMIZED_ADDR_H = (RANGE_ADDR_WIDTH > PKT_ADDR_W) ||
                                   (RANGE_ADDR_WIDTH == 0) ?
@@ -149,7 +150,6 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     localparam RG = RANGE_ADDR_WIDTH;
     localparam REAL_ADDRESS_RANGE = OPTIMIZED_ADDR_H - PKT_ADDR_L;
 
-    reg [PKT_DEST_ID_W-1 : 0] destid;
 
     // -------------------------------------------------------
     // Pass almost everything through, untouched
@@ -158,6 +158,7 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     assign src_valid         = sink_valid;
     assign src_startofpacket = sink_startofpacket;
     assign src_endofpacket   = sink_endofpacket;
+    wire [PKT_DEST_ID_W-1:0] default_destid;
     wire [2-1 : 0] default_src_channel;
 
 
@@ -165,8 +166,8 @@ module onchip_ram_256b_mm_interconnect_0_router_002
 
 
 
-    onchip_ram_256b_mm_interconnect_0_router_002_default_decode the_default_decode(
-      .default_destination_id (),
+    onchip_ram_256b_mm_interconnect_0_router_001_default_decode the_default_decode(
+      .default_destination_id (default_destid),
       .default_wr_channel   (),
       .default_rd_channel   (),
       .default_src_channel  (default_src_channel)
@@ -175,23 +176,19 @@ module onchip_ram_256b_mm_interconnect_0_router_002
     always @* begin
         src_data    = sink_data;
         src_channel = default_src_channel;
+        src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = default_destid;
 
         // --------------------------------------------------
-        // DestinationID Decoder
-        // Sets the channel based on the destination ID.
+        // Address Decoder
+        // Sets the channel and destination ID based on the address
         // --------------------------------------------------
-        destid      = sink_data[PKT_DEST_ID_H : PKT_DEST_ID_L];
-
-
-
-        if (destid == 1 ) begin
-            src_channel = 2'b01;
-        end
-
-        if (destid == 0 ) begin
-            src_channel = 2'b10;
-        end
-
+           
+         
+          // ( 0 .. 800000 )
+          src_channel = 2'b1;
+          src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 0;
+	     
+        
 
 end
 

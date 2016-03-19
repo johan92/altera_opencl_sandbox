@@ -6,7 +6,7 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
    element clk_0
@@ -64,7 +64,7 @@
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
  <interface
-   name="host_bridge_1_s0"
+   name="host_bridge_s0"
    internal="host_bridge_1.s0"
    type="avalon"
    dir="end" />
@@ -89,7 +89,7 @@
   <parameter name="ADDRESS_WIDTH" value="10" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
-  <parameter name="DATA_WIDTH" value="256" />
+  <parameter name="DATA_WIDTH" value="32" />
   <parameter name="LINEWRAPBURSTS" value="0" />
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
@@ -152,7 +152,7 @@
  <connection
    kind="avalon"
    version="15.1"
-   start="host_bridge_1.m0"
+   start="kernel_bridge.m0"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
@@ -161,7 +161,7 @@
  <connection
    kind="avalon"
    version="15.1"
-   start="kernel_bridge.m0"
+   start="host_bridge_1.m0"
    end="onchip_memory2_0.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
