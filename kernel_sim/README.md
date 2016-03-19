@@ -38,11 +38,6 @@ we can ignore this.
 
 If you need more real simulation, you can add in ram_model DDR/QDR model from Altera (may be I do it someday).
 
-## 00index
-- altera\_src - Altera RTL Sources (from Quartus 15.1)
-- ram\_models - models for Global Memory
-   - onchip\_ram\_256b - 8 MB onchip buffer, amm\_width = 256, amm\_maxburst = 16
-
 ## Usage
 For example you got OpenCL kernel 
 
@@ -76,3 +71,25 @@ vsim -do make.do
 ```
 
 See log (`transcript`) and/or waveforms.
+
+## example
+I add `vector\_add` example that generates from this kernel:
+
+```opencl
+__kernel void vector_add( __global const uint *restrict x, 
+    __global const uint *restrict y, 
+    __global       uint *restrict z )
+{
+  // get index of the work item
+  int index = get_global_id(0);
+
+  // add the vector elements
+  z[index] = x[index] + y[index];
+}
+```
+
+## 00index
+- altera\_src - Altera RTL Sources (from Quartus 15.1)
+- ram\_models - models for Global Memory
+   - onchip\_ram\_256b - 8 MB onchip buffer, amm\_width = 256, amm\_maxburst = 16
+
