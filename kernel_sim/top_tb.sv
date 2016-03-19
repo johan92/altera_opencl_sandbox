@@ -95,6 +95,13 @@ initial
 
 bit test_data_init_done;
 
+localparam N = 128;
+
+localparam bit [31:0] GLOBAL_ADDR_BUF_0 = 32'h0;
+localparam bit [31:0] GLOBAL_ADDR_BUF_1 = 32'h1000;
+localparam bit [31:0] GLOBAL_ADDR_BUF_2 = 32'h2000;
+
+
 initial
   begin
     wait( rst_done      );
@@ -103,15 +110,15 @@ initial
     repeat(10) @( posedge host_sdram_if.clk );
     
     // initialize first buffer
-    for( int i = 0; i < 128; i++ )
+    for( int i = 0; i < N; i++ )
       begin
-        host_sdram_if.write_word( 32'h0 + ( i * 4 ), i );
+        host_sdram_if.write_word( GLOBAL_ADDR_BUF_0 + ( i * 4 ), i );
       end
     
     // initialize second buffer
-    for( int i = 0; i < 128; i++ )
+    for( int i = 0; i < N; i++ )
       begin
-        host_sdram_if.write_word( 32'h1000 + ( i * 4 ), 2*i + 1 );
+        host_sdram_if.write_word( GLOBAL_ADDR_BUF_1 + ( i * 4 ), 2*i + 1 );
       end
 
     test_data_init_done = 1'b1;
@@ -119,32 +126,84 @@ initial
 
 assign host_sdram_if.burstcount = 1'd1;
 
+typedef struct {
+  int addr;
+  bit is_high_32b;
+} cra_addr_t;
+
+localparam cra_addr_t CRA_STATUS             = '{ 4'h0, 1'b0 };
+
+localparam cra_addr_t CRA_WORK_DIM           = '{ 4'h5, 1'b0 };
+localparam cra_addr_t CRA_WORKGROUP_SIZE     = '{ 4'h5, 1'b1 };
+
+localparam cra_addr_t CRA_GLOBAL_SIZE_0      = '{ 4'h6, 1'b0 };
+localparam cra_addr_t CRA_GLOBAL_SIZE_1      = '{ 4'h6, 1'b1 };
+localparam cra_addr_t CRA_GLOBAL_SIZE_2      = '{ 4'h7, 1'b0 };
+
+localparam cra_addr_t CRA_NUM_GROUPS_0       = '{ 4'h7, 1'b1 };
+localparam cra_addr_t CRA_NUM_GROUPS_1       = '{ 4'h8, 1'b0 };
+localparam cra_addr_t CRA_NUM_GROUPS_2       = '{ 4'h8, 1'b1 };
+
+localparam cra_addr_t CRA_LOCAL_SIZE_0       = '{ 4'h9, 1'b0 }; 
+localparam cra_addr_t CRA_LOCAL_SIZE_1       = '{ 4'h9, 1'b1 }; 
+localparam cra_addr_t CRA_LOCAL_SIZE_2       = '{ 4'hA, 1'b0 }; 
+
+localparam cra_addr_t CRA_GLOBAL_OFFSET_0    = '{ 4'hA, 1'b1 }; 
+localparam cra_addr_t CRA_GLOBAL_OFFSET_1    = '{ 4'hB, 1'b0 }; 
+localparam cra_addr_t CRA_GLOBAL_OFFSET_2    = '{ 4'hB, 1'b1 }; 
+
+localparam cra_addr_t CRA_KERNEL_ARG_0       = '{ 4'hC, 1'b0 };
+localparam cra_addr_t CRA_KERNEL_ARG_1       = '{ 4'hD, 1'b0 };
+localparam cra_addr_t CRA_KERNEL_ARG_2       = '{ 4'hE, 1'b0 };
+
+task automatic cra_write( input cra_addr_t _addr, bit [31:0] _data );
+  bit [63:0] wr_data   = '0;
+  bit [7:0]  wr_byteen = '0;
+
+  if( _addr.is_high_32b )
+    begin
+      wr_data[63:32] = _data;
+      wr_byteen[7:4] = '1;
+    end
+  else
+    begin
+      wr_data[31:0] = _data;
+      wr_byteen[3:0] = '1;
+    end
+
+  cra_if.write_word( _addr.addr, wr_data, wr_byteen, 1'b1 );
+endtask
+
+
 initial
   begin
     wait( ram_init_done );
     wait( test_data_init_done );
-    cra_if.write_word( 4'h5, 64'h0000000100000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'h6, 64'h0000000000000001, 8'h0F, 1 ); 
-    cra_if.write_word( 4'h6, 64'h0000000100000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'h7, 64'h0000000000000001, 8'h0F, 1 ); 
-    cra_if.write_word( 4'h7, 64'h0000000100000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'h8, 64'h0000000000000001, 8'h0F, 1 ); 
-    cra_if.write_word( 4'h8, 64'h0000000100000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'h9, 64'h0000000000000001, 8'h0F, 1 ); 
-    cra_if.write_word( 4'h9, 64'h0000000100000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'hA, 64'h0000000000000001, 8'h0F, 1 ); 
-    cra_if.write_word( 4'hA, 64'h0000000000000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'hB, 64'h0000000000000000, 8'h0F, 1 ); 
-    cra_if.write_word( 4'hB, 64'h0000000000000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'hC, 64'h0000000000000000, 8'h0F, 1 ); 
-    cra_if.write_word( 4'hC, 64'h0000000000000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'hD, 64'h0000000000001000, 8'h0F, 1 ); 
-    cra_if.write_word( 4'hD, 64'h0000000000000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'hE, 64'h000000000001f480, 8'h0F, 1 ); 
-    cra_if.write_word( 4'hE, 64'h0000000000000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'hF, 64'h0000000000002000, 8'h0F, 1 ); 
-    cra_if.write_word( 4'hF, 64'h0000000000000000, 8'hF0, 1 ); 
-    cra_if.write_word( 4'h0, 64'h0000000000000001, 8'h0F, 1 ); 
+
+    cra_write( CRA_WORK_DIM,         1  ); 
+    cra_write( CRA_WORKGROUP_SIZE,   N  ); 
+    
+    cra_write( CRA_GLOBAL_SIZE_0,    N  ); 
+    cra_write( CRA_GLOBAL_SIZE_1,    1  ); 
+    cra_write( CRA_GLOBAL_SIZE_2,    1  ); 
+    
+    cra_write( CRA_NUM_GROUPS_0,     1  ); 
+    cra_write( CRA_NUM_GROUPS_1,     1  ); 
+    cra_write( CRA_NUM_GROUPS_2,     1  ); 
+    
+    cra_write( CRA_LOCAL_SIZE_0,     N  );  
+    cra_write( CRA_LOCAL_SIZE_1,     1  );  
+    cra_write( CRA_LOCAL_SIZE_2,     1  );  
+    
+    cra_write( CRA_GLOBAL_OFFSET_0,  0  );  
+    cra_write( CRA_GLOBAL_OFFSET_1,  0  );  
+    cra_write( CRA_GLOBAL_OFFSET_2,  0  );  
+
+    cra_write( CRA_KERNEL_ARG_0,     GLOBAL_ADDR_BUF_0 );
+    cra_write( CRA_KERNEL_ARG_1,     GLOBAL_ADDR_BUF_1 );
+    cra_write( CRA_KERNEL_ARG_2,     GLOBAL_ADDR_BUF_2 );
+    
+    cra_write( CRA_STATUS,           'h1 );
   end
 
 // renaming lsu_top modules to more adequate names =)
